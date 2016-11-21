@@ -53,7 +53,7 @@ If you have questions about whether or not your work adheres to these guidelines
 **Project planning:**
 - A completed research plan according to the template provided in class
 - Competitive research in a Google Sheet
-- Written user personas--ideally from both new and longtime Yelp user perspectives
+- Written user personas
 - A list of prioritized features
 - A project plan presentation (there will be an in-class lab for this)
 - Completed user stories
