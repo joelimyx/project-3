@@ -1,4 +1,4 @@
-package com.joelimyx.flipvicefeed.main;
+package com.joelimyx.flipvicefeed.main.data;
 
 /**
  * Created by Joe on 11/29/16.
