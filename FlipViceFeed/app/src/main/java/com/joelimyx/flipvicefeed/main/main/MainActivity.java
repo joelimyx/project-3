@@ -1,5 +1,6 @@
 package com.joelimyx.flipvicefeed.main.main;
 
+import android.content.Intent;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.support.annotation.NonNull;
@@ -23,6 +24,7 @@ import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
 import com.google.gson.Gson;
+import com.joelimyx.flipvicefeed.Notifications.AlarmSettingsActivity;
 import com.joelimyx.flipvicefeed.R;
 import com.joelimyx.flipvicefeed.main.data.GsonArticle;
 import com.joelimyx.flipvicefeed.main.data.Item;
@@ -43,6 +45,9 @@ public class MainActivity extends AppCompatActivity
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        Intent intent = new Intent(MainActivity.this, AlarmSettingsActivity.class);
+        startActivity(intent);
         mVolleySingleton = VolleySingleton.getInstance(this);
 
         //RecyclerView
