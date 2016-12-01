@@ -1,5 +1,6 @@
 package com.joelimyx.flipvicefeed.main.main;
 
+import android.content.Intent;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.support.annotation.NonNull;
@@ -17,17 +18,17 @@ import android.view.View;
 import android.widget.Toast;
 
 import com.android.volley.Request;
-import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
-import com.android.volley.toolbox.Volley;
 import com.google.gson.Gson;
 import com.joelimyx.flipvicefeed.R;
-import com.joelimyx.flipvicefeed.main.data.GsonArticle;
-import com.joelimyx.flipvicefeed.main.data.Item;
-import com.joelimyx.flipvicefeed.main.data.VolleySingleton;
+import com.joelimyx.flipvicefeed.classes.GsonArticle;
+import com.joelimyx.flipvicefeed.classes.Item;
+import com.joelimyx.flipvicefeed.classes.VolleySingleton;
+import com.joelimyx.flipvicefeed.setting.SettingsActivity;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class MainActivity extends AppCompatActivity
@@ -48,6 +49,7 @@ public class MainActivity extends AppCompatActivity
         //RecyclerView
         mMainRecyclerView = (RecyclerView) findViewById(R.id.main_recyclerview);
         mMainRecyclerView.setLayoutManager(new LinearLayoutManager(this,LinearLayoutManager.VERTICAL,false));
+        mMainRecyclerView.setAdapter(new MainAdapter(new ArrayList<Item>(),this,this));
 
         mTwoPane = findViewById(R.id.fragment_container)!=null;
 
@@ -106,6 +108,10 @@ public class MainActivity extends AppCompatActivity
                 findViewById(R.id.progressbar).setVisibility(View.VISIBLE);
                 mAdapter.swapdata("stuff");
                 findViewById(R.id.progressbar).setVisibility(View.GONE);
+                break;
+            case R.id.setting:
+                Intent intent = new Intent(this, SettingsActivity.class);
+                startActivity(intent);
                 break;
         }
         mDrawerLayout.closeDrawer(GravityCompat.START);

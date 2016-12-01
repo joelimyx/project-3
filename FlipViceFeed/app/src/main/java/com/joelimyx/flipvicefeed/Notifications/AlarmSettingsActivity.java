@@ -1,4 +1,4 @@
-package com.joelimyx.flipvicefeed.Notifications;
+package com.joelimyx.flipvicefeed.notifications;
 
 import android.os.AsyncTask;
 import android.support.v7.app.AppCompatActivity;
@@ -9,8 +9,8 @@ import android.widget.CheckBox;
 import android.widget.TimePicker;
 import android.widget.Toast;
 
-import com.joelimyx.flipvicefeed.Notifications.Database.AlarmSQLHelper;
-import com.joelimyx.flipvicefeed.Notifications.Database.DBAssetHelper;
+import com.joelimyx.flipvicefeed.database.AlarmSQLHelper;
+import com.joelimyx.flipvicefeed.database.DBAssetHelper;
 import com.joelimyx.flipvicefeed.R;
 
 import java.util.ArrayList;

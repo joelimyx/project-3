@@ -1,8 +1,7 @@
-package com.joelimyx.flipvicefeed.Notifications;
+package com.joelimyx.flipvicefeed.notifications;
 
 
 import android.app.NotificationManager;
-import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;

@@ -1,4 +1,4 @@
-package com.joelimyx.flipvicefeed.Notifications.Database;
+package com.joelimyx.flipvicefeed.database;
 
 import android.content.ContentValues;
 import android.content.Context;
@@ -6,7 +6,7 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 
-import com.joelimyx.flipvicefeed.Notifications.TimeObject;
+import com.joelimyx.flipvicefeed.notifications.TimeObject;
 
 import java.util.ArrayList;
 import java.util.List;

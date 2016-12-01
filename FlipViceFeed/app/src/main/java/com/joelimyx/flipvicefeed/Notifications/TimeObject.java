@@ -1,4 +1,4 @@
-package com.joelimyx.flipvicefeed.Notifications;
+package com.joelimyx.flipvicefeed.notifications;
 
 /**
  * Created by KorbBookProReturns on 11/30/16.
