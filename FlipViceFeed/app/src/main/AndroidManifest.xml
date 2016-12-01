@@ -22,13 +22,12 @@
         <receiver
             android:name=".notifications.AlarmReceiver"
             android:process=":remote"/>
-
-        <activity android:name=".notifications.AlarmSettingsActivity">
-        </activity>
+        <activity android:name=".notifications.AlarmSettingsActivity"/>
         <activity
-            android:name=".setting.SettingsActivity"
+            android:name=".setting.SettingActivity"
             android:label="@string/title_activity_settings"
-            android:parentActivityName=".main.main.MainActivity">
+            android:parentActivityName=".main.main.MainActivity"
+            android:theme="@style/AppTheme.NoActionBar">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="com.joelimyx.flipvicefeed.main.main.MainActivity"/>

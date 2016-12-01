@@ -3,6 +3,7 @@ package com.joelimyx.flipvicefeed.main.main;
 import android.content.Intent;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
+import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.support.design.widget.NavigationView;
 import android.support.design.widget.Snackbar;
@@ -13,6 +14,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Toast;
@@ -26,7 +28,7 @@ import com.joelimyx.flipvicefeed.R;
 import com.joelimyx.flipvicefeed.classes.GsonArticle;
 import com.joelimyx.flipvicefeed.classes.Item;
 import com.joelimyx.flipvicefeed.classes.VolleySingleton;
-import com.joelimyx.flipvicefeed.setting.SettingsActivity;
+import com.joelimyx.flipvicefeed.setting.SettingActivity;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -110,7 +112,7 @@ public class MainActivity extends AppCompatActivity
                 findViewById(R.id.progressbar).setVisibility(View.GONE);
                 break;
             case R.id.setting:
-                Intent intent = new Intent(this, SettingsActivity.class);
+                Intent intent = new Intent(this, SettingActivity.class);
                 startActivity(intent);
                 break;
         }
