@@ -39,6 +39,8 @@ public class MainActivity extends AppCompatActivity
     private boolean mTwoPane;
     private VolleySingleton mVolleySingleton;
 
+
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
