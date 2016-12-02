@@ -135,7 +135,7 @@ public class DetailActivity extends AppCompatActivity {
             }else if (e.text().equals("") && !e.html().equals("")){
 
                 //CHECKS TO SEE IF THERE ARE NO <iframe> OBJECTS IN THE HTML
-                if (!e.html().contains("<iframe")) {
+                if (!e.html().contains("<iframe") && !e.html().contains("<br>")) {
 
                     String photoLink = e.html();
                     int indexStart = photoLink.indexOf("http");//GETS THE START AND END INDEX OF THE IMAGE LINK
