@@ -21,10 +21,17 @@ public class SettingActivity extends AppCompatActivity {
         toolbar.setTitle("Notification");
 
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-//        getSupportFragmentManager().beginTransaction().replace(R.id.setting_container,new NotificationFragment()).commit();
-        getSupportFragmentManager()
-                .beginTransaction()
-                .replace(R.id.setting_container,new TopicFilterFragment())
-                .commit();
+        if (getIntent().getStringExtra("setting").equals(getString(R.string.topic_filter))){
+            getSupportFragmentManager()
+                    .beginTransaction()
+                    .replace(R.id.setting_container,new TopicFilterFragment())
+                    .commit();
+        }else{
+            getSupportFragmentManager()
+                    .beginTransaction().
+                    replace(R.id.setting_container,new NotificationFragment())
+                    .commit();
+        }
+
     }
 }

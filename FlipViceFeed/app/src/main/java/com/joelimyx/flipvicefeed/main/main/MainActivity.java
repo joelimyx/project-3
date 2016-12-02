@@ -7,6 +7,7 @@ import android.content.IntentFilter;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.AsyncTask;
+import android.os.PersistableBundle;
 import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.support.design.widget.NavigationView;
@@ -23,6 +24,7 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.ProgressBar;
 import android.widget.Toast;
 
 import com.android.volley.Request;
@@ -44,19 +46,21 @@ import java.util.List;
 public class MainActivity extends AppCompatActivity
         implements MainAdapter.OnItemSelectedListener,
         NavigationView.OnNavigationItemSelectedListener {
+    ActionBarDrawerToggle mToggle;
     private RecyclerView mMainRecyclerView;
     private MainAdapter mAdapter;
     private DrawerLayout mDrawerLayout;
     private boolean mTwoPane;
     private VolleySingleton mVolleySingleton;
     private NetworkStateReceiver mNetworkStateReceiver;
-
+    private ProgressBar mProgressBar;
 
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        mProgressBar = (ProgressBar) findViewById(R.id.progressbar);
         mVolleySingleton = VolleySingleton.getInstance(this);
         new AsyncTask<Void, Void, Void>() {
             @Override
@@ -71,6 +75,7 @@ public class MainActivity extends AppCompatActivity
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         getSupportActionBar().setDefaultDisplayHomeAsUpEnabled(true);
+        getSupportActionBar().setTitle("Latest");
 
         //Registers Broadcast Receiver to Track Network Change
         IntentFilter filter = new IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION);
@@ -85,9 +90,15 @@ public class MainActivity extends AppCompatActivity
         mTwoPane = findViewById(R.id.fragment_container) != null;
 
         mDrawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
-        ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(this, mDrawerLayout, R.string.open_nav_bar, R.string.close_nav_bar);
-        mDrawerLayout.addDrawerListener(toggle);
-        toggle.syncState();
+        mToggle = new ActionBarDrawerToggle(
+                this,
+                mDrawerLayout,
+                toolbar,
+                R.string.open_nav_bar,
+                R.string.close_nav_bar);
+        mToggle.setDrawerIndicatorEnabled(true);
+        mDrawerLayout.addDrawerListener(mToggle);
+        mToggle.syncState();
 
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
@@ -96,33 +107,7 @@ public class MainActivity extends AppCompatActivity
         ConnectivityManager manager = (ConnectivityManager) getSystemService(CONNECTIVITY_SERVICE);
         NetworkInfo networkInfo = manager.getActiveNetworkInfo();
         if (networkInfo != null && networkInfo.isConnected()) {
-
-            String url = "http://www.vice.com/api/getlatest/";
-
-            StringRequest request = new StringRequest(Request.Method.GET, url,
-                    new Response.Listener<String>() {
-                        @Override
-                        public void onResponse(String response) {
-
-                            findViewById(R.id.progressbar).setVisibility(View.GONE);
-
-                            //Extracting data
-                            GsonArticle gsonArticle = new Gson().fromJson(response, GsonArticle.class);
-                            List<Item> items = gsonArticle.getData().getItems();
-
-                            //Setup up adapter to recycler view
-                            mAdapter = new MainAdapter(items, MainActivity.this, MainActivity.this);
-                            mMainRecyclerView.setAdapter(mAdapter);
-                        }
-                    },
-                    new Response.ErrorListener() {
-                        @Override
-                        public void onErrorResponse(VolleyError error) {
-                            Toast.makeText(MainActivity.this, "Error getting articles", Toast.LENGTH_SHORT).show();
-                        }
-                    });
-
-            mVolleySingleton.addToRequestQueue(request);
+            getLatestNews();
         } else {
             Snackbar.make(findViewById(R.id.drawer_layout), "No Network Connection", Snackbar.LENGTH_INDEFINITE).show();
         }
@@ -133,14 +118,34 @@ public class MainActivity extends AppCompatActivity
         //// TODO: 11/30/16 start detail activity if not in tablet else start detail fragment
     }
 
+    /*---------------------------------------------------------------------------------
+    // Navigation Drawer
+    ---------------------------------------------------------------------------------*/
     @Override
     public boolean onNavigationItemSelected(@NonNull MenuItem item) {
-
-        mAdapter.swapdata((String) item.getTitle());
-        mDrawerLayout.closeDrawer(GravityCompat.START);
-        return true;
+        mProgressBar.setVisibility(View.VISIBLE);
+        switch (item.getItemId()){
+            case R.id.latest:
+                getLatestNews();
+                mDrawerLayout.closeDrawer(GravityCompat.START);
+                getSupportActionBar().setTitle("Latest");
+                mProgressBar.setVisibility(View.GONE);
+                return true;
+            default:
+                mAdapter.swapdata((String) item.getTitle());
+                mDrawerLayout.closeDrawer(GravityCompat.START);
+                mMainRecyclerView.scrollToPosition(0);
+                if (getSupportActionBar()!=null) {
+                    getSupportActionBar().setTitle(item.getTitle());
+                }
+                mProgressBar.setVisibility(View.GONE);
+                return true;
+        }
     }
 
+    /*---------------------------------------------------------------------------------
+        // Toolbar AREA
+        ---------------------------------------------------------------------------------*/
     //Inflate Toolbar
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -149,12 +154,15 @@ public class MainActivity extends AppCompatActivity
         return super.onCreateOptionsMenu(menu);
     }
 
-
     //Select Option on Toolbar
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
-            case R.id.settings:
+            case R.id.alarm_settings:
+            case R.id.topic_setting:
+                Intent intent = new Intent(this,SettingActivity.class);
+                intent.putExtra("setting",item.getTitle());
+                startActivity(intent);
                 return true;
             case R.id.search:
                 return true;
@@ -163,6 +171,37 @@ public class MainActivity extends AppCompatActivity
         }
     }
 
+    /*---------------------------------------------------------------------------------
+    // Helper Method
+    ---------------------------------------------------------------------------------*/
+    public void getLatestNews(){
+        String url = "http://www.vice.com/api/getlatest/";
+
+        StringRequest request = new StringRequest(Request.Method.GET, url,
+                new Response.Listener<String>() {
+                    @Override
+                    public void onResponse(String response) {
+
+                        mProgressBar.setVisibility(View.GONE);
+
+                        //Extracting data
+                        GsonArticle gsonArticle = new Gson().fromJson(response, GsonArticle.class);
+                        List<Item> items = gsonArticle.getData().getItems();
+
+                        //Setup up adapter to recycler view
+                        mAdapter = new MainAdapter(items, MainActivity.this, MainActivity.this);
+                        mMainRecyclerView.setAdapter(mAdapter);
+                    }
+                },
+                new Response.ErrorListener() {
+                    @Override
+                    public void onErrorResponse(VolleyError error) {
+                        Toast.makeText(MainActivity.this, "Error getting articles", Toast.LENGTH_SHORT).show();
+                    }
+                });
+
+        mVolleySingleton.addToRequestQueue(request);
+    }
     @Override
     protected void onDestroy() {
         super.onDestroy();
