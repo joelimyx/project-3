@@ -14,8 +14,6 @@
         android:theme="@style/AppTheme.NoActionBar">
 
 
-
-
         <activity
             android:name=".DetailView.DetailActivity"
             android:label="@string/title_activity_detail"
@@ -24,9 +22,10 @@
         <activity android:name=".main.main.MainActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
-                <provider android:authorities="com.facebook.app.FacebookContentProvider226865891058843"
-                          android:name="com.facebook.FacebookContentProvider"
-                          android:exported="true"/>
+                <provider
+                    android:name="com.facebook.FacebookContentProvider"
+                    android:authorities="com.facebook.app.FacebookContentProvider226865891058843"
+                    android:exported="true"/>
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
         </activity>
@@ -34,6 +33,7 @@
         <receiver
             android:name=".notifications.AlarmReceiver"
             android:process=":remote"/>
+
         <activity android:name=".notifications.AlarmSettingsActivity"/>
         <activity
             android:name=".setting.SettingActivity"
@@ -44,26 +44,19 @@
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="com.joelimyx.flipvicefeed.main.main.MainActivity"/>
 
-        <receiver
-            android:name=".main.network.NetworkStateReceiver">
 
-            <intent-filter>
-                <action android:name="android.net.conn.CONNECTIVITY_CHANGE"/>
-            </intent-filter>
-
-        </receiver>
-
-        <activity android:name=".Notifications.AlarmSettingsActivity"/>
         </activity>
-        <activity android:name="com.facebook.FacebookActivity"
-                  tools:replace="android:theme"
-                  android:configChanges=
-                      "keyboard|keyboardHidden|screenLayout|screenSize|orientation"
-                  android:theme="@android:style/Theme.Translucent.NoTitleBar"
-                  android:label="@string/app_name" />
+        <activity
+            android:name="com.facebook.FacebookActivity"
+            android:configChanges=
+                "keyboard|keyboardHidden|screenLayout|screenSize|orientation"
+            android:label="@string/app_name"
+            android:theme="@android:style/Theme.Translucent.NoTitleBar"
+            tools:replace="android:theme"/>
 
-        <meta-data android:name="com.facebook.sdk.ApplicationId"
-                   android:value="@string/facebook_app_id"/>
+        <meta-data
+            android:name="com.facebook.sdk.ApplicationId"
+            android:value="@string/facebook_app_id"/>
 
 
     </application>

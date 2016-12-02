@@ -2,7 +2,9 @@ package com.joelimyx.flipvicefeed.main.main;
 
 import android.content.Intent;
 import android.app.SearchManager;
+import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.Intent;
 import android.content.IntentFilter;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
@@ -19,6 +21,7 @@ import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -36,7 +39,6 @@ import com.google.gson.Gson;
 import com.joelimyx.flipvicefeed.DetailView.DetailActivity;
 import com.joelimyx.flipvicefeed.R;
 import com.joelimyx.flipvicefeed.database.DBAssetHelper;
-import com.joelimyx.flipvicefeed.main.network.NetworkStateReceiver;
 import com.joelimyx.flipvicefeed.classes.GsonArticle;
 import com.joelimyx.flipvicefeed.classes.Item;
 import com.joelimyx.flipvicefeed.classes.VolleySingleton;
@@ -55,6 +57,7 @@ public class MainActivity extends AppCompatActivity
     private boolean mTwoPane;
     private VolleySingleton mVolleySingleton;
     private NetworkStateReceiver mNetworkStateReceiver;
+    private Snackbar mSnackbar;
     private ProgressBar mProgressBar;
 
 
@@ -73,6 +76,8 @@ public class MainActivity extends AppCompatActivity
                 return null;
             }
         }.execute();
+
+        mSnackbar = Snackbar.make(findViewById(R.id.drawer_layout), "No Network Available", Snackbar.LENGTH_INDEFINITE);
 
         //Toolbar
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
@@ -215,6 +220,26 @@ public class MainActivity extends AppCompatActivity
         // Unregisters BroadcastReceiver when app is destroyed.
         if (mNetworkStateReceiver != null) {
             this.unregisterReceiver(mNetworkStateReceiver);
+        }
+    }
+
+
+    public class NetworkStateReceiver extends BroadcastReceiver {
+
+        private static final String TAG = "NetworkStateReceiver";
+
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            Log.d(TAG, "onReceive: ");
+            ConnectivityManager conn = (ConnectivityManager)
+                    context.getSystemService(Context.CONNECTIVITY_SERVICE);
+            NetworkInfo networkInfo = conn.getActiveNetworkInfo();
+
+            if (networkInfo == null) {
+                mSnackbar.show();
+            } else {
+                mSnackbar.dismiss();
+            }
         }
     }
 }
