@@ -24,14 +24,6 @@
             android:name=".Notifications.AlarmReceiver"
             android:process=":remote"/>
 
-        <receiver
-            android:name=".main.network.NetworkStateReceiver">
-
-            <intent-filter>
-                <action android:name="android.net.conn.CONNECTIVITY_CHANGE"/>
-            </intent-filter>
-
-        </receiver>
 
         <activity android:name=".Notifications.AlarmSettingsActivity">
         </activity>

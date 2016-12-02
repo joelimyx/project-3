@@ -1,7 +1,9 @@
 package com.joelimyx.flipvicefeed.main.main;
 
 import android.app.SearchManager;
+import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.Intent;
 import android.content.IntentFilter;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
@@ -17,6 +19,7 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.SearchView;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -34,7 +37,6 @@ import com.joelimyx.flipvicefeed.R;
 import com.joelimyx.flipvicefeed.main.data.GsonArticle;
 import com.joelimyx.flipvicefeed.main.data.Item;
 import com.joelimyx.flipvicefeed.main.data.VolleySingleton;
-import com.joelimyx.flipvicefeed.main.network.NetworkStateReceiver;
 
 import java.util.List;
 
@@ -47,12 +49,16 @@ public class MainActivity extends AppCompatActivity
     private boolean mTwoPane;
     private VolleySingleton mVolleySingleton;
     private NetworkStateReceiver mNetworkStateReceiver;
+    private Snackbar mSnackbar;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         mVolleySingleton = VolleySingleton.getInstance(this);
+
+        mSnackbar = Snackbar.make(findViewById(R.id.drawer_layout), "No Network Available", Snackbar.LENGTH_INDEFINITE);
 
         //Toolbar
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
@@ -109,8 +115,14 @@ public class MainActivity extends AppCompatActivity
                     });
 
             mVolleySingleton.addToRequestQueue(request);
+
         } else {
+
             Snackbar.make(findViewById(R.id.drawer_layout), "No Network Connection", Snackbar.LENGTH_INDEFINITE).show();
+
+
+
+
         }
     }
 
@@ -123,7 +135,9 @@ public class MainActivity extends AppCompatActivity
     public boolean onNavigationItemSelected(@NonNull MenuItem item) {
 
         mAdapter.swapdata((String) item.getTitle());
+        mMainRecyclerView.scrollToPosition(0);
         mDrawerLayout.closeDrawer(GravityCompat.START);
+
         return true;
     }
 
@@ -157,4 +171,26 @@ public class MainActivity extends AppCompatActivity
             this.unregisterReceiver(mNetworkStateReceiver);
         }
     }
+
+
+    public class NetworkStateReceiver extends BroadcastReceiver {
+
+        private static final String TAG = "NetworkStateReceiver";
+
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            Log.d(TAG, "onReceive: ");
+            ConnectivityManager conn = (ConnectivityManager)
+                    context.getSystemService(Context.CONNECTIVITY_SERVICE);
+            NetworkInfo networkInfo = conn.getActiveNetworkInfo();
+
+            if (networkInfo == null) {
+                mSnackbar.show();
+            } else {
+                mSnackbar.dismiss();
+            }
+        }
+    }
 }
+
+
