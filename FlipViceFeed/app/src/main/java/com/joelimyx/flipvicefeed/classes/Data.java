@@ -1,5 +1,5 @@
 
-package com.joelimyx.flipvicefeed.main.data;
+package com.joelimyx.flipvicefeed.classes;
 
 import java.util.ArrayList;
 import java.util.List;

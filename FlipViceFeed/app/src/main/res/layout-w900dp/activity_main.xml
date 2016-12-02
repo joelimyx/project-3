@@ -1,26 +1,46 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout
+<android.support.v4.widget.DrawerLayout
+    android:id="@+id/drawer_layout"
+    android:layout_height="match_parent"
+    android:layout_width="match_parent"
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/activity_main"
-    android:orientation="horizontal"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    tools:context="com.joelimyx.flipvicefeed.main.main.MainActivity">
+    xmlns:app="http://schemas.android.com/apk/res-auto">
     <LinearLayout
-        android:orientation="vertical"
-        android:layout_weight="3"
-        android:layout_width="0dp"
-        android:layout_height="match_parent">
-        <android.support.v7.widget.RecyclerView
-            android:id="@+id/main_recyclerview"
+        android:id="@+id/activity_main"
+        android:orientation="horizontal"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        tools:context="com.joelimyx.flipvicefeed.main.main.MainActivity">
+
+        <RelativeLayout
+            android:layout_weight="3"
             android:layout_width="0dp"
-            android:layout_height="match_parent"/>
+            android:layout_height="match_parent">
+            <ProgressBar
+                android:id="@+id/progressbar"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:theme="@style/Widget.AppCompat.ProgressBar"/>
+            <android.support.v7.widget.RecyclerView
+                android:id="@+id/main_recyclerview"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"/>
+        </RelativeLayout>
+
+        <FrameLayout
+            android:id="@+id/fragment_container"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="7"/>
     </LinearLayout>
 
-    <FrameLayout
-        android:id="@+id/fragment_container"
-        android:layout_weight="7"
-        android:layout_width="0dp"
-        android:layout_height="match_parent"/>
-</LinearLayout>
+    <android.support.design.widget.NavigationView
+        android:id="@+id/nav_view"
+        android:fitsSystemWindows="true"
+        android:layout_gravity="start"
+        android:layout_width="200dp"
+        android:layout_height="match_parent"
+        app:headerLayout="@layout/nav_header_main"
+        app:menu="@menu/list_item_nav"/>
+</android.support.v4.widget.DrawerLayout>

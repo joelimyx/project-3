@@ -1,17 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
+          xmlns:tools="http://schemas.android.com/tools"
           package="com.joelimyx.flipvicefeed">
 
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
     <uses-permission android:name="android.permission.INTERNET"/>
+
     <application
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
         android:supportsRtl="true"
-        android:theme="@style/AppTheme">
-
-
+        android:theme="@style/AppTheme.NoActionBar">
 
 
         <activity
@@ -28,21 +28,43 @@
             </intent-filter>
         </activity>
 
+
+
+        <activity android:name=".notifications.AlarmSettingsActivity"/>
+        <activity
+            android:name=".setting.SettingActivity"
+            android:label="@string/title_activity_settings"
+            android:parentActivityName=".main.main.MainActivity"
+            android:theme="@style/AppTheme.NoActionBar">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="com.joelimyx.flipvicefeed.main.main.MainActivity"/>
+
+
+        </activity>
+        <activity
+            android:name="com.facebook.FacebookActivity"
+            android:configChanges=
+                "keyboard|keyboardHidden|screenLayout|screenSize|orientation"
+            android:label="@string/app_name"
+            android:theme="@android:style/Theme.Translucent.NoTitleBar"
+            tools:replace="android:theme"/>
+
+        <meta-data
+            android:name="com.facebook.sdk.ApplicationId"
+            android:value="@string/facebook_app_id"/>
+
+
         <receiver
-            android:name=".Notifications.AlarmReceiver"
+            android:name=".notifications.AlarmReceiver"
             android:process=":remote"/>
 
-        <receiver
-            android:name=".main.network.NetworkStateReceiver">
+        <provider
+            android:name="com.facebook.FacebookContentProvider"
+            android:authorities="com.facebook.app.FacebookContentProvider226865891058843"
+            android:exported="true"/>
 
-            <intent-filter>
-                <action android:name="android.net.conn.CONNECTIVITY_CHANGE"/>
-            </intent-filter>
 
-        </receiver>
-
-        <activity android:name=".Notifications.AlarmSettingsActivity">
-        </activity>
     </application>
 
 </manifest>

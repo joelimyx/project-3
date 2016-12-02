@@ -1,8 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:app="http://schemas.android.com/apk/res-auto"
       xmlns:android="http://schemas.android.com/apk/res/android">
-    <!-- TODO Populate list-->
 
+    <item
+        android:id="@+id/latest"
+        android:title="Latest"/>
     <item
         android:id="@+id/news"
         android:title="News"/>
@@ -33,12 +35,4 @@
     <item
         android:id="@+id/culture"
         android:title="Culture"/>
-
-
-
-
-
-
-
-
 </menu>

@@ -1,4 +1,4 @@
-package com.joelimyx.flipvicefeed.main.data;
+package com.joelimyx.flipvicefeed.classes;
 
 import android.content.Context;
 import android.graphics.Bitmap;

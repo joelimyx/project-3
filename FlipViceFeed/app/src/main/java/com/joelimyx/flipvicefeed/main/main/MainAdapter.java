@@ -21,9 +21,9 @@ import com.android.volley.toolbox.StringRequest;
 import com.google.gson.Gson;
 import com.joelimyx.flipvicefeed.DetailView.DetailActivity;
 import com.joelimyx.flipvicefeed.R;
-import com.joelimyx.flipvicefeed.main.data.GsonArticle;
-import com.joelimyx.flipvicefeed.main.data.Item;
-import com.joelimyx.flipvicefeed.main.data.VolleySingleton;
+import com.joelimyx.flipvicefeed.classes.GsonArticle;
+import com.joelimyx.flipvicefeed.classes.Item;
+import com.joelimyx.flipvicefeed.classes.VolleySingleton;
 import com.squareup.picasso.Picasso;
 
 import java.util.List;

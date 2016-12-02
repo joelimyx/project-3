@@ -1,13 +1,11 @@
-package com.joelimyx.flipvicefeed.Notifications;
+package com.joelimyx.flipvicefeed.notifications;
 
 import android.app.AlarmManager;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 
-import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.List;
 
 /**
  * Created by KorbBookProReturns on 11/30/16.
