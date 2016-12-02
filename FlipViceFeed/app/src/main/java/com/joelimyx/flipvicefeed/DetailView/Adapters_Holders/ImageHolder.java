@@ -27,7 +27,10 @@ public class ImageHolder extends RecyclerView.ViewHolder {
 
     public void bindDataToViews(String imageUrl, Context context){
 
-        Picasso.with(context).load(imageUrl).into(mImage);
+        Picasso.with(context)
+                .load(imageUrl)
+                .fit()
+                .into(mImage);
 
     }
 }
