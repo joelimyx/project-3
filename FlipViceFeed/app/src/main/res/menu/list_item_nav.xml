@@ -1,10 +1,35 @@
 <?xml version="1.0" encoding="utf-8"?>
-<menu xmlns:android="http://schemas.android.com/apk/res/android">
-    <!-- TODO Populate list-->
+<menu xmlns:app="http://schemas.android.com/apk/res-auto"
+      xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <item
+        android:id="@+id/news"
+        android:title="News"/>
+    <item
+        android:id="@+id/tech"
+        android:title="Tech"/>
+    <item
+        android:id="@+id/music"
+        android:title="Music"/>
+    <item
+        android:id="@+id/sports"
+        android:title="Sports"/>
+    <item
+        android:id="@+id/travel"
+        android:title="Travel"/>
+    <item
+        android:id="@+id/fashion"
+        android:title="Fashion"/>
     <item
         android:id="@+id/stuff"
-        android:title="stuff"/>
+        android:title="Stuff"/>
     <item
-        android:id="@+id/setting"
-        android:title="Setting"/>
+        android:id="@+id/nsfw"
+        android:title="NSFW"/>
+    <item
+        android:id="@+id/food"
+        android:title="Food"/>
+    <item
+        android:id="@+id/culture"
+        android:title="Culture"/>
 </menu>
