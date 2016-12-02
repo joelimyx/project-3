@@ -122,54 +122,7 @@ public class MainActivity extends AppCompatActivity
     @Override
     public boolean onNavigationItemSelected(@NonNull MenuItem item) {
 
-        switch (item.getItemId()) {
-
-            case R.id.news:
-                findViewById(R.id.progressbar).setVisibility(View.VISIBLE);
-                mAdapter.swapdata("News");
-                findViewById(R.id.progressbar).setVisibility(View.GONE);
-                break;
-            case R.id.tech:
-                findViewById(R.id.progressbar).setVisibility(View.VISIBLE);
-                mAdapter.swapdata("Tech");
-                findViewById(R.id.progressbar).setVisibility(View.GONE);
-                break;
-            case R.id.music:
-                findViewById(R.id.progressbar).setVisibility(View.VISIBLE);
-                mAdapter.swapdata("Music");
-                findViewById(R.id.progressbar).setVisibility(View.GONE);
-                break;
-            case R.id.sports:
-                findViewById(R.id.progressbar).setVisibility(View.VISIBLE);
-                mAdapter.swapdata("Sports");
-                findViewById(R.id.progressbar).setVisibility(View.GONE);
-                break;
-            case R.id.travel:
-                findViewById(R.id.progressbar).setVisibility(View.VISIBLE);
-                mAdapter.swapdata("Travel");
-                findViewById(R.id.progressbar).setVisibility(View.GONE);
-                break;
-            case R.id.fashion:
-                findViewById(R.id.progressbar).setVisibility(View.VISIBLE);
-                mAdapter.swapdata("Fashion");
-                findViewById(R.id.progressbar).setVisibility(View.GONE);
-                break;
-            case R.id.nsfw:
-                findViewById(R.id.progressbar).setVisibility(View.VISIBLE);
-                mAdapter.swapdata("NSFW");
-                findViewById(R.id.progressbar).setVisibility(View.GONE);
-                break;
-            case R.id.food:
-                findViewById(R.id.progressbar).setVisibility(View.VISIBLE);
-                mAdapter.swapdata("Food");
-                findViewById(R.id.progressbar).setVisibility(View.GONE);
-                break;
-            case R.id.culture:
-                findViewById(R.id.progressbar).setVisibility(View.VISIBLE);
-                mAdapter.swapdata("Culture");
-                findViewById(R.id.progressbar).setVisibility(View.GONE);
-                break;
-        }
+        mAdapter.swapdata((String) item.getTitle());
         mDrawerLayout.closeDrawer(GravityCompat.START);
         return true;
     }
