@@ -1,6 +1,7 @@
 package com.joelimyx.flipvicefeed.DetailView;
 
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
@@ -18,6 +19,9 @@ import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
+import com.facebook.share.model.ShareLinkContent;
+import com.facebook.share.widget.ShareButton;
+import com.facebook.share.widget.ShareDialog;
 import com.google.gson.Gson;
 import com.joelimyx.flipvicefeed.DetailView.Adapters_Holders.ArticleInfoAdapter;
 import com.joelimyx.flipvicefeed.DetailView.ArticleObjectData.ArticleObject;
@@ -30,7 +34,10 @@ import com.joelimyx.flipvicefeed.R;
 import com.joelimyx.flipvicefeed.main.data.Data;
 import com.joelimyx.flipvicefeed.main.data.GsonArticle;
 import com.joelimyx.flipvicefeed.main.data.Item;
+import com.joelimyx.flipvicefeed.main.data.ShareGsonRootObject;
+import com.joelimyx.flipvicefeed.main.data.ShareItem;
 import com.joelimyx.flipvicefeed.main.data.VolleySingleton;
+import com.joelimyx.flipvicefeed.main.main.MainActivity;
 
 import org.jsoup.Jsoup;
 import org.jsoup.safety.Cleaner;
@@ -64,6 +71,9 @@ public class DetailActivity extends AppCompatActivity {
         Intent intent = getIntent();
         int id = intent.getIntExtra("id",-1);
         String idAsString = Integer.toString(id);
+
+        //FACEBOOK SHARING
+        getDataForShare(id);
 
         mListOfObjectsInArticle = new ArrayList<>();
         //STARTS VOLLEY API SEARCH FOR INDIVIDUAL ARTICLE
@@ -170,5 +180,50 @@ public class DetailActivity extends AppCompatActivity {
     public void populateList(List<ArticleObject> list){
         mListOfObjectsInArticle.addAll(list); //ADDS LIST TO THE MAIN LIST AND
         mAdapter.notifyDataSetChanged();      //AND UPDATES ADAPTER
+    }
+
+    //------------------------------------- ----  --     -              -
+    //  SHARING TO FACEBOOK BUTTON
+    //------------------------------------- ----  --     -              -
+
+    public void getDataForShare(Integer id){
+        String url = "http://www.vice.com/api/article/"+id;
+        StringRequest request = new StringRequest(Request.Method.GET, url,
+                new Response.Listener<String>() {
+                    @Override
+                    public void onResponse(String response) {
+                        ShareGsonRootObject shareGsonRoot = new Gson().fromJson(response,ShareGsonRootObject.class);
+                        ShareItem item = shareGsonRoot.getData().getArticle();
+                        shareThisToFacebook(item.getTitle(),
+                                Uri.parse(item.getThumb()),
+                                Uri.parse(item.getUrl()));
+                    }
+                },
+                new Response.ErrorListener() {
+                    @Override
+                    public void onErrorResponse(VolleyError error) {
+                        Toast.makeText(DetailActivity.this, "Error when attempting to share.", Toast.LENGTH_SHORT).show();
+                    }
+                });
+        VolleySingleton.getInstance(DetailActivity.this).addToRequestQueue(request);
+    }
+
+    public void shareThisToFacebook(String title, Uri imageUrl, Uri linkUrl){
+        final ShareButton shareButton = (ShareButton)findViewById(R.id.fb_share_button);
+
+        final ShareLinkContent fbShare = new ShareLinkContent.Builder()
+                .setContentTitle(title)
+                .setImageUrl(imageUrl)
+                .setContentUrl(linkUrl)
+                .build();
+
+        shareButton.setShareContent(fbShare);
+
+        shareButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                ShareDialog.show(DetailActivity.this,fbShare);
+            }
+        });
     }
 }
