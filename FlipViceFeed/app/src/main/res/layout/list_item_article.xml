@@ -12,12 +12,15 @@
         android:layout_width="match_parent"
         android:layout_height="60dp"
         android:layout_gravity="bottom"
-        android:background="#d8505050">
+        android:background="#aa000000">
         <TextView
             android:id="@+id/article_item_title"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:textColor="#eee"
+            android:layout_marginLeft="8dp"
+            android:layout_marginRight="8dp"
+            android:fontFamily="sans-serif-condensed"
             android:textSize="22sp"/>
     </FrameLayout>
 </android.support.v7.widget.CardView>

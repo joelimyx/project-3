@@ -33,6 +33,8 @@ public class MainAdapter extends RecyclerView.Adapter<MainAdapter.MainViewHolder
     private List<Item> mArticleList;
     private OnItemSelectedListener mListener;
     private Context mContext;
+    private int mPageCount;
+    private String mPath;
 
     interface OnItemSelectedListener{
         void onItemSelected(int id);
@@ -42,6 +44,8 @@ public class MainAdapter extends RecyclerView.Adapter<MainAdapter.MainViewHolder
         mArticleList = articleList;
         mListener = listener;
         mContext = context;
+        mPageCount = 0;
+        mPath = "latest";
     }
 
     @Override
@@ -53,7 +57,6 @@ public class MainAdapter extends RecyclerView.Adapter<MainAdapter.MainViewHolder
 
     @Override
     public void onBindViewHolder(MainViewHolder holder, final int position) {
-
         holder.mTitleText.setText(mArticleList.get(position).getTitle());
         Picasso.with(mContext).setLoggingEnabled(true);
         Picasso.with(mContext)
@@ -65,10 +68,11 @@ public class MainAdapter extends RecyclerView.Adapter<MainAdapter.MainViewHolder
             @Override
             public void onClick(View view) {
                 mListener.onItemSelected(mArticleList.get(position).getId());
-                String id = mArticleList.get(position).getId().toString();
-
             }
         });
+        if (position == getItemCount()-1){
+            addData(mPath);
+        }
     }
 
     @Override
@@ -77,6 +81,7 @@ public class MainAdapter extends RecyclerView.Adapter<MainAdapter.MainViewHolder
     }
 
     public void swapdata(String path){
+        mPageCount = 0;
         String url = "http://vice.com/api/getlatest/category/"+path;
         mArticleList.clear();
 
@@ -103,10 +108,42 @@ public class MainAdapter extends RecyclerView.Adapter<MainAdapter.MainViewHolder
         VolleySingleton.getInstance(mContext).addToRequestQueue(request);
     }
 
+    //TODO change path dynamically
+    private void addData(String path){
+        mPageCount++;
+        String url = "http://www.vice.com/api/getlatest/"+mPageCount;
+        StringRequest request = new StringRequest(Request.Method.GET, url,
+                new Response.Listener<String>() {
+                    @Override
+                    public void onResponse(String response) {
+
+                        //Extracting data
+                        GsonArticle gsonArticle = new Gson().fromJson(response,GsonArticle.class);
+                        List<Item> items = gsonArticle.getData().getItems();
+
+                        //Setup up adapter to recycler view
+                        mArticleList.addAll(items);
+                        notifyDataSetChanged();
+                    }
+                },
+                new Response.ErrorListener() {
+                    @Override
+                    public void onErrorResponse(VolleyError error) {
+                        Toast.makeText(mContext, "Error getting articles", Toast.LENGTH_SHORT).show();
+                    }
+                });
+        VolleySingleton.getInstance(mContext).addToRequestQueue(request);
+
+    }
+    public void setPath(String path){
+        mPath = path;
+    }
+
     class MainViewHolder extends RecyclerView.ViewHolder{
         private TextView mTitleText;
         private ImageView mArticleImage;
         private FrameLayout mArticleItemLayout;
+
         public MainViewHolder(View itemView) {
             super(itemView);
             mTitleText = (TextView) itemView.findViewById(R.id.article_item_title);
