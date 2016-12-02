@@ -1,14 +1,18 @@
 package com.joelimyx.flipvicefeed.main.main;
 
+import android.app.Activity;
+import android.app.ActivityOptions;
 import android.app.SearchManager;
 import android.content.Context;
 import android.content.IntentFilter;
 import android.content.Intent;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
+import android.os.Build;
 import android.support.annotation.NonNull;
 import android.support.design.widget.NavigationView;
 import android.support.design.widget.Snackbar;
+import android.support.v4.util.Pair;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
@@ -122,9 +126,11 @@ public class MainActivity extends AppCompatActivity
     public void onItemSelected(int id) {
         //// TODO: 11/30/16 start detail activity if not in tablet else start detail fragment
 
-        Intent intent = new Intent(this, DetailActivity.class);
-        intent.putExtra("id", id);
-        startActivity(intent);
+            Intent intent = new Intent(this, DetailActivity.class);
+            intent.putExtra("id", id);
+            startActivity(intent);
+
+
     }
 
     @Override

@@ -1,7 +1,10 @@
 package com.joelimyx.flipvicefeed.main.main;
 
+import android.app.Activity;
+import android.app.ActivityOptions;
 import android.content.Context;
 import android.content.Intent;
+import android.os.Build;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -52,7 +55,7 @@ public class MainAdapter extends RecyclerView.Adapter<MainAdapter.MainViewHolder
     }
 
     @Override
-    public void onBindViewHolder(MainViewHolder holder, final int position) {
+    public void onBindViewHolder(final MainViewHolder holder, final int position) {
 
         holder.mTitleText.setText(mArticleList.get(position).getTitle());
         Picasso.with(mContext).setLoggingEnabled(true);
