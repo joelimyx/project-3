@@ -138,10 +138,6 @@
                 android:layout_height="wrap_content"/>
         </LinearLayout>
 
-
-
-
-
     </LinearLayout>
     <Button
         android:id="@+id/testList"

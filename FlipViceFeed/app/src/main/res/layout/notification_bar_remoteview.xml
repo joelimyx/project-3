@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+             android:layout_width="match_parent"
+             android:layout_height="60dp">
+
+    <ImageView
+        android:id="@+id/remote_image_background"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:scaleType="centerCrop"
+        android:adjustViewBounds="true"
+        android:src="@drawable/remote_notification_test_image"/>
+
+
+
+    <ImageView
+        android:id="@+id/remote_edgefade"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:scaleType="fitXY"
+        android:adjustViewBounds="true"
+        android:src="@drawable/edge_fades"/>
+
+    <ImageView
+        android:layout_width="35dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="15dp"
+        android:layout_marginBottom="15dp"
+        android:layout_marginLeft="10dp"
+
+        android:src="@drawable/voozicon"/>
+
+    <TextView
+        android:id="@+id/remote_textshadow"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_vertical"
+        android:textColor="#000000"
+        android:text="New Stories in STUFF:"
+        android:textSize="20sp"
+        android:fontFamily="sans-serif-condensed"
+        android:textStyle="bold"
+        android:layout_marginTop="11dp"
+        android:layout_marginBottom="11dp"
+        android:layout_marginLeft="52dp"
+        android:alpha=".5"/>
+    <TextView
+        android:id="@+id/remote_text"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_vertical"
+        android:textColor="#ffffff"
+        android:text="New Stories in STUFF:"
+        android:textSize="20sp"
+        android:fontFamily="sans-serif-condensed"
+        android:textStyle="bold"
+        android:layout_marginTop="11dp"
+        android:layout_marginBottom="11dp"
+        android:layout_marginLeft="50dp"/>
+
+
+
+</FrameLayout>

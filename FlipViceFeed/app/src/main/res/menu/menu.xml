@@ -9,9 +9,12 @@
           app:showAsAction="always"/>
 
 
-    <item android:id="@+id/settings"
-          android:icon="@drawable/settings"
-          android:title="Settings"
-          app:showAsAction="always"/>
+    <item android:id="@+id/alarm_settings"
+          android:title="@string/notification_setting"
+          app:showAsAction="never"/>
+
+    <item android:id="@+id/topic_setting"
+          android:title="@string/topic_filter"
+          app:showAsAction="never"/>
 
 </menu>
