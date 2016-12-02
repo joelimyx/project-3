@@ -1,12 +1,14 @@
-package com.joelimyx.flipvicefeed.Notifications.Database;
+package com.joelimyx.flipvicefeed.database;
 
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
+import android.util.Log;
 
-import com.joelimyx.flipvicefeed.Notifications.TimeObject;
+import com.joelimyx.flipvicefeed.classes.TimeObject;
+import com.joelimyx.flipvicefeed.classes.TopicObject;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -18,8 +20,7 @@ import java.util.List;
 public class AlarmSQLHelper extends SQLiteOpenHelper {
     private static final String TAG = AlarmSQLHelper.class.getCanonicalName();
 
-    private static final int DATABASE_VERSION = 1;
-
+    private static final int DATABASE_VERSION = 2;
     public static final String DATABASE_NAME = "notifications.db";
 
     public static final String ALARMS_TABLE = "ALARMS_TABLE";
@@ -30,7 +31,6 @@ public class AlarmSQLHelper extends SQLiteOpenHelper {
     public static final String COL_MIN = "MINUTE";
 
     public static final String[] ALL_COLUMNS = {COL_ID,COL_DAY,COL_HOUR,COL_MIN};
-    public static final String[] JUST_THE_HOUR_COLUMN = {COL_HOUR};
 
     private static final String CREATE_TABLE =
             "CREATE TABLE " + ALARMS_TABLE + "(" +
@@ -38,6 +38,18 @@ public class AlarmSQLHelper extends SQLiteOpenHelper {
                     COL_DAY + " INTEGER, " +
                     COL_HOUR + " INTEGER, " +
                     COL_MIN + " INTEGER)";
+
+    public static final String TOPIC_FILTER_TABLE = "TOPIC_LIST_TABLE";
+    public static final String COL_TOPIC_NAME = "topic";
+    public static final String COL_TOPIC_SELECTED = "selected";
+
+    public static final String[] TOPIC_COLUMNS = {COL_TOPIC_NAME,COL_TOPIC_SELECTED};
+
+    public static final String CREATE_TOPIC_TABLE =
+            "CREATE TABLE "+TOPIC_FILTER_TABLE+"("+
+                    "id INTEGER PRIMARY KEY AUTOINCREMENT, "+
+                    COL_TOPIC_NAME+" TEXT, "+
+                    COL_TOPIC_SELECTED+" INTEGER )";
 
     private static AlarmSQLHelper mInstance;
 
@@ -55,20 +67,65 @@ public class AlarmSQLHelper extends SQLiteOpenHelper {
     @Override
     public void onCreate(SQLiteDatabase db) {
         db.execSQL(CREATE_TABLE);
+        db.execSQL(CREATE_TOPIC_TABLE);
     }
 
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
         db.execSQL("DROP TABLE IF EXISTS " + ALARMS_TABLE);
+        db.execSQL("DROP TABLE IF EXISTS " + TOPIC_FILTER_TABLE);
         this.onCreate(db);
     }
 
+    /*---------------------------------------------------------------------------------
+    // TOPIC FILTER PART
+    ---------------------------------------------------------------------------------*/
+    public List<TopicObject> getAllTopic(){
+        SQLiteDatabase db = getReadableDatabase();
+        Cursor cursor = db.query(
+                TOPIC_FILTER_TABLE,
+                TOPIC_COLUMNS,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null);
+        List<TopicObject> topicList = new ArrayList<>();
+        if (cursor.moveToFirst()){
+            if (!cursor.isAfterLast()){
+                Log.d(TAG, "getAllTopic: "+cursor.getString(cursor.getColumnIndex(COL_TOPIC_NAME)));
+                topicList.add(new TopicObject(
+                        cursor.getString(cursor.getColumnIndex(COL_TOPIC_NAME)),
+                        cursor.getInt(cursor.getColumnIndex(COL_TOPIC_SELECTED))
+                ));
+                cursor.moveToNext();
+            }
+        }
+        return topicList;
+    }
+
+    public void updateSelectedTopic(String topic, boolean changedState){
+        ContentValues values = new ContentValues();
+        int state = changedState ? 1:0;
+        values.put(COL_TOPIC_SELECTED,state);
+
+        SQLiteDatabase db = getWritableDatabase();
+        db.update(TOPIC_FILTER_TABLE,
+                values,
+                COL_TOPIC_NAME+" = ?",
+                new String[]{topic});
+        db.close();
+    }
+    /*---------------------------------------------------------------------------------
+    // ALARM NOTIFICATION PART
+    ---------------------------------------------------------------------------------*/
 
     //---------------------------------------------
     //  Method for getting which boxes were checked
     //---------------------------------------------
 
-    public List<TimeObject> getAllForCheckboxes() {
+    public List<TimeObject> getAllDaysAndTime() {
         SQLiteDatabase db = getReadableDatabase();
 
         Cursor cursor = db.query(ALARMS_TABLE,
@@ -90,7 +147,6 @@ public class AlarmSQLHelper extends SQLiteOpenHelper {
         return checkList;
     }
 
-
     //---------------------------------------------
     //  Method for updating days and time
     //---------------------------------------------
@@ -104,5 +160,4 @@ public class AlarmSQLHelper extends SQLiteOpenHelper {
         db.update(ALARMS_TABLE,values,COL_DAY+" = ?",new String[]{Integer.toString(day)});
         db.close();
     }
-
 }

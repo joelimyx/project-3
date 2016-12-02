@@ -31,13 +31,9 @@ import com.joelimyx.flipvicefeed.DetailView.IndividualArticleData.Article;
 import com.joelimyx.flipvicefeed.DetailView.IndividualArticleData.ArticleData;
 import com.joelimyx.flipvicefeed.DetailView.IndividualArticleData.Example;
 import com.joelimyx.flipvicefeed.R;
-import com.joelimyx.flipvicefeed.main.data.Data;
-import com.joelimyx.flipvicefeed.main.data.GsonArticle;
-import com.joelimyx.flipvicefeed.main.data.Item;
 import com.joelimyx.flipvicefeed.main.data.ShareGsonRootObject;
 import com.joelimyx.flipvicefeed.main.data.ShareItem;
-import com.joelimyx.flipvicefeed.main.data.VolleySingleton;
-import com.joelimyx.flipvicefeed.main.main.MainActivity;
+import com.joelimyx.flipvicefeed.classes.VolleySingleton;
 
 import org.jsoup.Jsoup;
 import org.jsoup.safety.Cleaner;

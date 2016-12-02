@@ -1,5 +1,5 @@
 
-package com.joelimyx.flipvicefeed.main.data;
+package com.joelimyx.flipvicefeed.classes;
 
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;

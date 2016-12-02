@@ -11,7 +11,7 @@
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
         android:supportsRtl="true"
-        android:theme="@style/AppTheme">
+        android:theme="@style/AppTheme.NoActionBar">
 
 
 
@@ -32,8 +32,17 @@
         </activity>
 
         <receiver
-            android:name=".Notifications.AlarmReceiver"
+            android:name=".notifications.AlarmReceiver"
             android:process=":remote"/>
+        <activity android:name=".notifications.AlarmSettingsActivity"/>
+        <activity
+            android:name=".setting.SettingActivity"
+            android:label="@string/title_activity_settings"
+            android:parentActivityName=".main.main.MainActivity"
+            android:theme="@style/AppTheme.NoActionBar">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="com.joelimyx.flipvicefeed.main.main.MainActivity"/>
 
         <receiver
             android:name=".main.network.NetworkStateReceiver">
@@ -44,7 +53,7 @@
 
         </receiver>
 
-        <activity android:name=".Notifications.AlarmSettingsActivity">
+        <activity android:name=".Notifications.AlarmSettingsActivity"/>
         </activity>
         <activity android:name="com.facebook.FacebookActivity"
                   tools:replace="android:theme"
