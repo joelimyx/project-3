@@ -12,6 +12,10 @@ public class Data {
     @Expose
     private List<Item> items = new ArrayList<>();
 
+    @SerializedName("item")
+    @Expose
+    private Item item = new Item();
+
     /**
      * 
      * @return
@@ -19,6 +23,11 @@ public class Data {
      */
     public List<Item> getItems() {
         return items;
+    }
+
+
+    public Item getItem(){
+        return item;
     }
 
 
