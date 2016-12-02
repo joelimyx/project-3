@@ -17,6 +17,10 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:theme="@style/Widget.AppCompat.ProgressBar"/>
+        <com.facebook.share.widget.ShareButton
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/fb_share_button"/>
         <android.support.v7.widget.RecyclerView
             android:id="@+id/main_recyclerview"
             android:layout_width="match_parent"

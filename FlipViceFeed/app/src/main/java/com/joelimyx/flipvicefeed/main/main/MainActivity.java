@@ -2,6 +2,8 @@ package com.joelimyx.flipvicefeed.main.main;
 
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
+import android.net.Uri;
+import android.os.AsyncTask;
 import android.support.annotation.NonNull;
 import android.support.design.widget.NavigationView;
 import android.support.design.widget.Snackbar;
@@ -12,27 +14,36 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Toast;
 
 import com.android.volley.Request;
-import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
-import com.android.volley.toolbox.Volley;
+
+import com.facebook.FacebookSdk;
+import com.facebook.share.model.ShareLinkContent;
+import com.facebook.share.widget.ShareButton;
+import com.facebook.share.widget.ShareDialog;
+
 import com.google.gson.Gson;
 import com.joelimyx.flipvicefeed.R;
 import com.joelimyx.flipvicefeed.main.data.GsonArticle;
 import com.joelimyx.flipvicefeed.main.data.Item;
+import com.joelimyx.flipvicefeed.main.data.ShareGsonRootObject;
+import com.joelimyx.flipvicefeed.main.data.ShareItem;
 import com.joelimyx.flipvicefeed.main.data.VolleySingleton;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class MainActivity extends AppCompatActivity
         implements MainAdapter.OnItemSelectedListener,
         NavigationView.OnNavigationItemSelectedListener{
+    private static final String TAG = "ok";
     private RecyclerView mMainRecyclerView;
     private MainAdapter mAdapter;
     private DrawerLayout mDrawerLayout;
@@ -41,11 +52,20 @@ public class MainActivity extends AppCompatActivity
 
 
 
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        FacebookSdk.sdkInitialize(getApplicationContext());
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         mVolleySingleton = VolleySingleton.getInstance(this);
+
+
+        getDataForShare(254510);
+
+
+
+
 
         //RecyclerView
         mMainRecyclerView = (RecyclerView) findViewById(R.id.main_recyclerview);
@@ -112,5 +132,52 @@ public class MainActivity extends AppCompatActivity
         }
         mDrawerLayout.closeDrawer(GravityCompat.START);
         return true;
+    }
+
+
+
+    //------------------------------------- ----  --     -              -
+    //  SHARING TO FACEBOOK BUTTON
+    //------------------------------------- ----  --     -              -
+
+    public void getDataForShare(Integer id){
+        String url = "http://www.vice.com/api/article/"+id;
+        StringRequest request = new StringRequest(Request.Method.GET, url,
+                new Response.Listener<String>() {
+                    @Override
+                    public void onResponse(String response) {
+                        ShareGsonRootObject shareGsonRoot = new Gson().fromJson(response,ShareGsonRootObject.class);
+                        ShareItem item = shareGsonRoot.getData().getArticle();
+                        shareThisToFacebook(item.getTitle(),
+                                Uri.parse(item.getThumb()),
+                                Uri.parse(item.getUrl()));
+                    }
+                },
+                new Response.ErrorListener() {
+                    @Override
+                    public void onErrorResponse(VolleyError error) {
+                        Toast.makeText(MainActivity.this, "Error when attempting to share.", Toast.LENGTH_SHORT).show();
+                    }
+                });
+        VolleySingleton.getInstance(MainActivity.this).addToRequestQueue(request);
+    }
+
+    public void shareThisToFacebook(String title, Uri imageUrl, Uri linkUrl){
+        final ShareButton shareButton = (ShareButton)findViewById(R.id.fb_share_button);
+
+        final ShareLinkContent fbShare = new ShareLinkContent.Builder()
+                .setContentTitle(title)
+                .setImageUrl(imageUrl)
+                .setContentUrl(linkUrl)
+                .build();
+
+        shareButton.setShareContent(fbShare);
+
+        shareButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                ShareDialog.show(MainActivity.this,fbShare);
+            }
+        });
     }
 }
