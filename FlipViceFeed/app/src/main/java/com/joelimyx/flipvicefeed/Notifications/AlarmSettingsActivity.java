@@ -9,6 +9,7 @@ import android.widget.CheckBox;
 import android.widget.TimePicker;
 import android.widget.Toast;
 
+import com.joelimyx.flipvicefeed.classes.TimeObject;
 import com.joelimyx.flipvicefeed.database.AlarmSQLHelper;
 import com.joelimyx.flipvicefeed.database.DBAssetHelper;
 import com.joelimyx.flipvicefeed.R;
@@ -64,7 +65,7 @@ public class AlarmSettingsActivity extends AppCompatActivity {
         new AsyncTask<Void, Void, Void>() {
             @Override
             protected Void doInBackground(Void... voids) {
-                mTimeObjectList = AlarmSQLHelper.getInstance(AlarmSettingsActivity.this).getAllForCheckboxes();
+                mTimeObjectList = AlarmSQLHelper.getInstance(AlarmSettingsActivity.this).getAllDaysAndTime();
                 return null;
             }
 

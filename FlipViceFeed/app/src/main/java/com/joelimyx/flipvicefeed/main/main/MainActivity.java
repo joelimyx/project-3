@@ -3,6 +3,7 @@ package com.joelimyx.flipvicefeed.main.main;
 import android.content.Intent;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
+import android.os.AsyncTask;
 import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.support.design.widget.NavigationView;
@@ -28,6 +29,8 @@ import com.joelimyx.flipvicefeed.R;
 import com.joelimyx.flipvicefeed.classes.GsonArticle;
 import com.joelimyx.flipvicefeed.classes.Item;
 import com.joelimyx.flipvicefeed.classes.VolleySingleton;
+import com.joelimyx.flipvicefeed.database.DBAssetHelper;
+import com.joelimyx.flipvicefeed.notifications.AlarmSettingsActivity;
 import com.joelimyx.flipvicefeed.setting.SettingActivity;
 
 import java.util.ArrayList;
@@ -47,6 +50,14 @@ public class MainActivity extends AppCompatActivity
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         mVolleySingleton = VolleySingleton.getInstance(this);
+        new AsyncTask<Void, Void, Void>() {
+            @Override
+            protected Void doInBackground(Void... voids) {
+                DBAssetHelper dbSetup = new DBAssetHelper(MainActivity.this);
+                dbSetup.getReadableDatabase();
+                return null;
+            }
+        }.execute();
 
         //RecyclerView
         mMainRecyclerView = (RecyclerView) findViewById(R.id.main_recyclerview);

@@ -20,8 +20,7 @@ import com.joelimyx.flipvicefeed.R;
 import com.joelimyx.flipvicefeed.database.AlarmSQLHelper;
 import com.joelimyx.flipvicefeed.database.DBAssetHelper;
 import com.joelimyx.flipvicefeed.notifications.AlarmService;
-import com.joelimyx.flipvicefeed.notifications.AlarmSettingsActivity;
-import com.joelimyx.flipvicefeed.notifications.TimeObject;
+import com.joelimyx.flipvicefeed.classes.TimeObject;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -152,7 +151,7 @@ public class NotificationFragment extends Fragment {
         new AsyncTask<Void, Void, Void>() {
             @Override
             protected Void doInBackground(Void... voids) {
-                mTimeObjectList = AlarmSQLHelper.getInstance(getContext()).getAllForCheckboxes();
+                mTimeObjectList = AlarmSQLHelper.getInstance(getContext()).getAllDaysAndTime();
                 return null;
             }
 
