@@ -2,6 +2,7 @@ package com.joelimyx.flipvicefeed.main.main;
 
 import android.app.SearchManager;
 import android.content.Context;
+import android.content.IntentFilter;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.support.annotation.NonNull;
@@ -33,6 +34,7 @@ import com.joelimyx.flipvicefeed.R;
 import com.joelimyx.flipvicefeed.main.data.GsonArticle;
 import com.joelimyx.flipvicefeed.main.data.Item;
 import com.joelimyx.flipvicefeed.main.data.VolleySingleton;
+import com.joelimyx.flipvicefeed.main.network.NetworkStateReceiver;
 
 import java.util.List;
 
@@ -44,6 +46,7 @@ public class MainActivity extends AppCompatActivity
     private DrawerLayout mDrawerLayout;
     private boolean mTwoPane;
     private VolleySingleton mVolleySingleton;
+    private NetworkStateReceiver mNetworkStateReceiver;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -55,6 +58,11 @@ public class MainActivity extends AppCompatActivity
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         getSupportActionBar().setDefaultDisplayHomeAsUpEnabled(true);
+
+        //Registers Broadcast Receiver to Track Network Change
+        IntentFilter filter = new IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION);
+        mNetworkStateReceiver = new NetworkStateReceiver();
+        this.registerReceiver(mNetworkStateReceiver, filter);
 
         //RecyclerView
         mMainRecyclerView = (RecyclerView) findViewById(R.id.main_recyclerview);
@@ -74,7 +82,9 @@ public class MainActivity extends AppCompatActivity
         ConnectivityManager manager = (ConnectivityManager) getSystemService(CONNECTIVITY_SERVICE);
         NetworkInfo networkInfo = manager.getActiveNetworkInfo();
         if (networkInfo != null && networkInfo.isConnected()) {
+
             String url = "http://www.vice.com/api/getlatest/";
+
             StringRequest request = new StringRequest(Request.Method.GET, url,
                     new Response.Listener<String>() {
                         @Override
@@ -97,6 +107,7 @@ public class MainActivity extends AppCompatActivity
                             Toast.makeText(MainActivity.this, "Error getting articles", Toast.LENGTH_SHORT).show();
                         }
                     });
+
             mVolleySingleton.addToRequestQueue(request);
         } else {
             Snackbar.make(findViewById(R.id.drawer_layout), "No Network Connection", Snackbar.LENGTH_INDEFINITE).show();
@@ -112,7 +123,6 @@ public class MainActivity extends AppCompatActivity
     public boolean onNavigationItemSelected(@NonNull MenuItem item) {
 
         switch (item.getItemId()) {
-            // TODO: 11/30/16 Populate switch case
 
             case R.id.news:
                 findViewById(R.id.progressbar).setVisibility(View.VISIBLE);
@@ -183,6 +193,15 @@ public class MainActivity extends AppCompatActivity
                 return true;
             default:
                 return super.onOptionsItemSelected(item);
+        }
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        // Unregisters BroadcastReceiver when app is destroyed.
+        if (mNetworkStateReceiver != null) {
+            this.unregisterReceiver(mNetworkStateReceiver);
         }
     }
 }
