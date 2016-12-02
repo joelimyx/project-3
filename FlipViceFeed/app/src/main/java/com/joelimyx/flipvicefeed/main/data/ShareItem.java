@@ -1,10 +1,10 @@
 
-package com.joelimyx.flipvicefeed.classes;
+package com.joelimyx.flipvicefeed.main.data;
 
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
-public class Item {
+public class ShareItem {
 
     @SerializedName("title")
     @Expose
@@ -15,12 +15,12 @@ public class Item {
     @SerializedName("thumb")
     @Expose
     private String thumb;
-    @SerializedName("body")
+    @SerializedName("url")
     @Expose
-    private String body;
+    private String url;
 
     /**
-     * 
+     *
      * @return
      *     The title
      */
@@ -29,7 +29,7 @@ public class Item {
     }
 
     /**
-     * 
+     *
      * @return
      *     The id
      */
@@ -39,7 +39,7 @@ public class Item {
 
 
     /**
-     * 
+     *
      * @return
      *     The thumb
      */
@@ -47,13 +47,13 @@ public class Item {
         return thumb;
     }
 
+
     /**
      *
      * @return
-     *      The body
+     *     The url
      */
-    public String getBody(){
-        return body;
+    public String getUrl() {
+        return url;
     }
-
 }

@@ -6,4 +6,7 @@
     <string name="saved_switch_state">saved switch</string>
     <string name="notification_setting">Notification Setting</string>
     <string name="topic_filter">Topic Filter</string>
+    <string name="title_activity_detail">Detail View</string>
+
+    <string name="facebook_app_id">226865891058843</string>
 </resources>

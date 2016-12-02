@@ -6,6 +6,8 @@ import android.content.Context;
 import android.content.IntentFilter;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
+import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.AsyncTask;
 import android.os.PersistableBundle;
 import android.preference.PreferenceManager;
@@ -31,7 +33,18 @@ import com.android.volley.Request;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
+
+import com.facebook.FacebookSdk;
+import com.facebook.share.model.ShareLinkContent;
+import com.facebook.share.widget.ShareButton;
+import com.facebook.share.widget.ShareDialog;
+
+import com.facebook.FacebookSdk;
+import com.facebook.share.model.ShareLinkContent;
+import com.facebook.share.widget.ShareButton;
+import com.facebook.share.widget.ShareDialog;
 import com.google.gson.Gson;
+import com.joelimyx.flipvicefeed.DetailView.DetailActivity;
 import com.joelimyx.flipvicefeed.R;
 import com.joelimyx.flipvicefeed.main.network.NetworkStateReceiver;
 import com.joelimyx.flipvicefeed.classes.GsonArticle;
@@ -58,6 +71,7 @@ public class MainActivity extends AppCompatActivity
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        FacebookSdk.sdkInitialize(getApplicationContext());
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         mProgressBar = (ProgressBar) findViewById(R.id.progressbar);
@@ -87,7 +101,7 @@ public class MainActivity extends AppCompatActivity
         mMainRecyclerView.setLayoutManager(new LinearLayoutManager(this,LinearLayoutManager.VERTICAL,false));
         mMainRecyclerView.setAdapter(new MainAdapter(new ArrayList<Item>(),this,this));
 
-        mTwoPane = findViewById(R.id.fragment_container) != null;
+        mTwoPane = findViewById(R.id.fragment_container)!=null;
 
         mDrawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
         mToggle = new ActionBarDrawerToggle(
@@ -116,6 +130,10 @@ public class MainActivity extends AppCompatActivity
     @Override
     public void onItemSelected(int id) {
         //// TODO: 11/30/16 start detail activity if not in tablet else start detail fragment
+
+        Intent intent = new Intent(this, DetailActivity.class);
+        intent.putExtra("id", id);
+        startActivity(intent);
     }
 
     /*---------------------------------------------------------------------------------
