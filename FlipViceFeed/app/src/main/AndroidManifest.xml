@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.joelimyx.flipvicefeed">
+          package="com.joelimyx.flipvicefeed">
 
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
     <uses-permission android:name="android.permission.INTERNET"/>
@@ -20,16 +20,28 @@
             android:theme="@style/AppTheme.NoActionBar"/>
 
         <activity android:name=".main.main.MainActivity">
-
             <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
+                <action android:name="android.intent.action.MAIN"/>
 
-                <category android:name="android.intent.category.LAUNCHER" />
+                <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
         </activity>
 
-    </application>
+        <receiver
+            android:name=".Notifications.AlarmReceiver"
+            android:process=":remote"/>
 
-    <uses-permission android:name="android.permission.INTERNET"/>
+        <receiver
+            android:name=".main.network.NetworkStateReceiver">
+
+            <intent-filter>
+                <action android:name="android.net.conn.CONNECTIVITY_CHANGE"/>
+            </intent-filter>
+
+        </receiver>
+
+        <activity android:name=".Notifications.AlarmSettingsActivity">
+        </activity>
+    </application>
 
 </manifest>

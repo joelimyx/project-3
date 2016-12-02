@@ -1,5 +1,8 @@
 package com.joelimyx.flipvicefeed.main.main;
 
+import android.app.SearchManager;
+import android.content.Context;
+import android.content.IntentFilter;
 import android.content.Intent;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
@@ -13,6 +16,10 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.SearchView;
+import android.support.v7.widget.Toolbar;
+import android.view.Menu;
+import android.view.MenuInflater;
 import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
@@ -30,6 +37,7 @@ import com.joelimyx.flipvicefeed.R;
 import com.joelimyx.flipvicefeed.main.data.GsonArticle;
 import com.joelimyx.flipvicefeed.main.data.Item;
 import com.joelimyx.flipvicefeed.main.data.VolleySingleton;
+import com.joelimyx.flipvicefeed.main.network.NetworkStateReceiver;
 
 import java.util.List;
 
@@ -41,12 +49,25 @@ public class MainActivity extends AppCompatActivity
     private DrawerLayout mDrawerLayout;
     private boolean mTwoPane;
     private VolleySingleton mVolleySingleton;
+    private NetworkStateReceiver mNetworkStateReceiver;
+
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         mVolleySingleton = VolleySingleton.getInstance(this);
+
+        //Toolbar
+        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
+        getSupportActionBar().setDefaultDisplayHomeAsUpEnabled(true);
+
+        //Registers Broadcast Receiver to Track Network Change
+        IntentFilter filter = new IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION);
+        mNetworkStateReceiver = new NetworkStateReceiver();
+        this.registerReceiver(mNetworkStateReceiver, filter);
 
         //RecyclerView
         mMainRecyclerView = (RecyclerView) findViewById(R.id.main_recyclerview);
@@ -67,6 +88,7 @@ public class MainActivity extends AppCompatActivity
         NetworkInfo networkInfo = manager.getActiveNetworkInfo();
         if (networkInfo != null && networkInfo.isConnected()){
             String url = "http://www.vice.com/api/getlatest/";
+
             StringRequest request = new StringRequest(Request.Method.GET, url,
                     new Response.Listener<String>() {
                         @Override
@@ -118,5 +140,36 @@ public class MainActivity extends AppCompatActivity
         }
         mDrawerLayout.closeDrawer(GravityCompat.START);
         return true;
+    }
+
+    //Inflate Toolbar
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.menu, menu);
+        return super.onCreateOptionsMenu(menu);
+    }
+
+
+    //Select Option on Toolbar
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.settings:
+                return true;
+            case R.id.search:
+                return true;
+            default:
+                return super.onOptionsItemSelected(item);
+        }
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        // Unregisters BroadcastReceiver when app is destroyed.
+        if (mNetworkStateReceiver != null) {
+            this.unregisterReceiver(mNetworkStateReceiver);
+        }
     }
 }

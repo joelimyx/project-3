@@ -79,6 +79,7 @@ public class MainAdapter extends RecyclerView.Adapter<MainAdapter.MainViewHolder
     public void swapdata(String path){
         String url = "http://vice.com/api/getlatest/category/"+path;
         mArticleList.clear();
+
         StringRequest request = new StringRequest(Request.Method.GET, url,
                 new Response.Listener<String>() {
                     @Override
