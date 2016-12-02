@@ -1,5 +1,9 @@
 package com.joelimyx.flipvicefeed.main.main;
 
+import android.app.SearchManager;
+import android.content.Context;
+import android.content.IntentFilter;
+import android.content.Intent;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.Uri;
@@ -14,6 +18,10 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.SearchView;
+import android.support.v7.widget.Toolbar;
+import android.view.Menu;
+import android.view.MenuInflater;
 import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
@@ -29,13 +37,19 @@ import com.facebook.share.model.ShareLinkContent;
 import com.facebook.share.widget.ShareButton;
 import com.facebook.share.widget.ShareDialog;
 
+import com.facebook.FacebookSdk;
+import com.facebook.share.model.ShareLinkContent;
+import com.facebook.share.widget.ShareButton;
+import com.facebook.share.widget.ShareDialog;
 import com.google.gson.Gson;
+import com.joelimyx.flipvicefeed.DetailView.DetailActivity;
 import com.joelimyx.flipvicefeed.R;
 import com.joelimyx.flipvicefeed.main.data.GsonArticle;
 import com.joelimyx.flipvicefeed.main.data.Item;
 import com.joelimyx.flipvicefeed.main.data.ShareGsonRootObject;
 import com.joelimyx.flipvicefeed.main.data.ShareItem;
 import com.joelimyx.flipvicefeed.main.data.VolleySingleton;
+import com.joelimyx.flipvicefeed.main.network.NetworkStateReceiver;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -43,13 +57,12 @@ import java.util.List;
 public class MainActivity extends AppCompatActivity
         implements MainAdapter.OnItemSelectedListener,
         NavigationView.OnNavigationItemSelectedListener{
-    private static final String TAG = "ok";
     private RecyclerView mMainRecyclerView;
     private MainAdapter mAdapter;
     private DrawerLayout mDrawerLayout;
     private boolean mTwoPane;
     private VolleySingleton mVolleySingleton;
-
+    private NetworkStateReceiver mNetworkStateReceiver;
 
 
 
@@ -60,12 +73,15 @@ public class MainActivity extends AppCompatActivity
         setContentView(R.layout.activity_main);
         mVolleySingleton = VolleySingleton.getInstance(this);
 
+        //Toolbar
+        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
+        getSupportActionBar().setDefaultDisplayHomeAsUpEnabled(true);
 
-        getDataForShare(254510);
-
-
-
-
+        //Registers Broadcast Receiver to Track Network Change
+        IntentFilter filter = new IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION);
+        mNetworkStateReceiver = new NetworkStateReceiver();
+        this.registerReceiver(mNetworkStateReceiver, filter);
 
         //RecyclerView
         mMainRecyclerView = (RecyclerView) findViewById(R.id.main_recyclerview);
@@ -96,6 +112,7 @@ public class MainActivity extends AppCompatActivity
                             //Extracting data
                             GsonArticle gsonArticle = new Gson().fromJson(response,GsonArticle.class);
                             List<Item> items = gsonArticle.getData().getItems();
+                            Log.d("MAIN ACTIVITY", "onResponse: Created List on Main" + items);
 
                             //Setup up adapter to recycler view
                             mAdapter = new MainAdapter(items,MainActivity.this,MainActivity.this);
@@ -117,6 +134,10 @@ public class MainActivity extends AppCompatActivity
     @Override
     public void onItemSelected(int id) {
         //// TODO: 11/30/16 start detail activity if not in tablet else start detail fragment
+
+        Intent intent = new Intent(this, DetailActivity.class);
+        intent.putExtra("id", id);
+        startActivity(intent);
     }
 
     @Override
@@ -132,6 +153,37 @@ public class MainActivity extends AppCompatActivity
         }
         mDrawerLayout.closeDrawer(GravityCompat.START);
         return true;
+    }
+
+    //Inflate Toolbar
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.menu, menu);
+        return super.onCreateOptionsMenu(menu);
+    }
+
+
+    //Select Option on Toolbar
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.settings:
+                return true;
+            case R.id.search:
+                return true;
+            default:
+                return super.onOptionsItemSelected(item);
+        }
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        // Unregisters BroadcastReceiver when app is destroyed.
+        if (mNetworkStateReceiver != null) {
+            this.unregisterReceiver(mNetworkStateReceiver);
+        }
     }
 
 

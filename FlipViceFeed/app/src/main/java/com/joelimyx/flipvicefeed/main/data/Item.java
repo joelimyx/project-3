@@ -15,6 +15,9 @@ public class Item {
     @SerializedName("thumb")
     @Expose
     private String thumb;
+    @SerializedName("body")
+    @Expose
+    private String body;
 
     /**
      * 
@@ -42,6 +45,15 @@ public class Item {
      */
     public String getThumb() {
         return thumb;
+    }
+
+    /**
+     *
+     * @return
+     *      The body
+     */
+    public String getBody(){
+        return body;
     }
 
 }
