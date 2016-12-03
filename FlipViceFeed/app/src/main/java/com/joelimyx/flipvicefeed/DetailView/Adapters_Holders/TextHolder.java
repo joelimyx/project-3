@@ -1,10 +1,10 @@
-package com.joelimyx.flipvicefeed.DetailView.Adapters_Holders;
+package com.joelimyx.flipvicefeed.detailview.adapters_holders;
 
 import android.support.v7.widget.RecyclerView;
 import android.view.View;
 import android.widget.TextView;
 
-import com.joelimyx.flipvicefeed.DetailView.ArticleObjectData.Text;
+import com.joelimyx.flipvicefeed.detailview.articleobjectdata.Text;
 import com.joelimyx.flipvicefeed.R;
 
 /**

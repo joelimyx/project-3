@@ -33,7 +33,7 @@ import com.android.volley.toolbox.StringRequest;
 
 import com.facebook.FacebookSdk;
 import com.google.gson.Gson;
-import com.joelimyx.flipvicefeed.DetailView.DetailActivity;
+import com.joelimyx.flipvicefeed.detailview.DetailActivity;
 import com.joelimyx.flipvicefeed.R;
 import com.joelimyx.flipvicefeed.database.DBAssetHelper;
 import com.joelimyx.flipvicefeed.main.network.NetworkStateReceiver;

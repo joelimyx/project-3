@@ -1,4 +1,4 @@
-package com.joelimyx.flipvicefeed.DetailView.ArticleObjectData;
+package com.joelimyx.flipvicefeed.detailview.articleobjectdata;
 
 import com.squareup.picasso.Picasso;
 

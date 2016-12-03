@@ -1,4 +1,4 @@
-package com.joelimyx.flipvicefeed.DetailView.IndividualArticleData;
+package com.joelimyx.flipvicefeed.detailview.individualarticledata;
 
 /**
  * Created by colinbradley on 12/1/16.

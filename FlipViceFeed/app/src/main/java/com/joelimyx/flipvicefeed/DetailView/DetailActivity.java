@@ -1,4 +1,4 @@
-package com.joelimyx.flipvicefeed.DetailView;
+package com.joelimyx.flipvicefeed.detailview;
 
 import android.content.Intent;
 import android.net.Uri;
@@ -23,13 +23,13 @@ import com.facebook.share.model.ShareLinkContent;
 import com.facebook.share.widget.ShareButton;
 import com.facebook.share.widget.ShareDialog;
 import com.google.gson.Gson;
-import com.joelimyx.flipvicefeed.DetailView.Adapters_Holders.ArticleInfoAdapter;
-import com.joelimyx.flipvicefeed.DetailView.ArticleObjectData.ArticleObject;
-import com.joelimyx.flipvicefeed.DetailView.ArticleObjectData.Image;
-import com.joelimyx.flipvicefeed.DetailView.ArticleObjectData.Text;
-import com.joelimyx.flipvicefeed.DetailView.IndividualArticleData.Article;
-import com.joelimyx.flipvicefeed.DetailView.IndividualArticleData.ArticleData;
-import com.joelimyx.flipvicefeed.DetailView.IndividualArticleData.Example;
+import com.joelimyx.flipvicefeed.detailview.adapters_holders.ArticleInfoAdapter;
+import com.joelimyx.flipvicefeed.detailview.articleobjectdata.ArticleObject;
+import com.joelimyx.flipvicefeed.detailview.articleobjectdata.Image;
+import com.joelimyx.flipvicefeed.detailview.articleobjectdata.Text;
+import com.joelimyx.flipvicefeed.detailview.individualarticledata.Article;
+import com.joelimyx.flipvicefeed.detailview.individualarticledata.ArticleData;
+import com.joelimyx.flipvicefeed.detailview.individualarticledata.Example;
 import com.joelimyx.flipvicefeed.R;
 import com.joelimyx.flipvicefeed.main.data.ShareGsonRootObject;
 import com.joelimyx.flipvicefeed.main.data.ShareItem;
