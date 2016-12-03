@@ -8,9 +8,9 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.SharedPreferences;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
-import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.support.annotation.NonNull;
@@ -19,6 +19,7 @@ import android.support.design.widget.Snackbar;
 import android.support.v4.util.Pair;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
+import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -29,8 +30,6 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
-import android.view.View;
-import android.widget.ProgressBar;
 import android.widget.Toast;
 
 import com.android.volley.Request;
@@ -46,15 +45,19 @@ import com.joelimyx.flipvicefeed.database.DBAssetHelper;
 import com.joelimyx.flipvicefeed.classes.GsonArticle;
 import com.joelimyx.flipvicefeed.classes.Item;
 import com.joelimyx.flipvicefeed.classes.VolleySingleton;
+import com.joelimyx.flipvicefeed.setting.NotificationFragment;
 import com.joelimyx.flipvicefeed.setting.SettingActivity;
+import com.joelimyx.flipvicefeed.setting.TopicFilterFragment;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class MainActivity extends AppCompatActivity
         implements MainAdapter.OnItemSelectedListener,
-        NavigationView.OnNavigationItemSelectedListener {
+        NavigationView.OnNavigationItemSelectedListener,
+        SwipeRefreshLayout.OnRefreshListener{
     ActionBarDrawerToggle mToggle;
+
     private RecyclerView mMainRecyclerView;
     private MainAdapter mAdapter;
     private DrawerLayout mDrawerLayout;
@@ -62,16 +65,23 @@ public class MainActivity extends AppCompatActivity
     private VolleySingleton mVolleySingleton;
     private NetworkStateReceiver mNetworkStateReceiver;
     private Snackbar mSnackbar;
-    private ProgressBar mProgressBar;
 
+    private SwipeRefreshLayout mSwipeRefreshLayout;
+    private EndlessRecyclerViewScrollListener mScrollListener;
+    private static final String TAG = "MainActivity";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         FacebookSdk.sdkInitialize(getApplicationContext());
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        mProgressBar = (ProgressBar) findViewById(R.id.progressbar);
+
+        //Reference
+        mTwoPane = findViewById(R.id.fragment_container)!=null;
+        mSwipeRefreshLayout = (SwipeRefreshLayout) findViewById(R.id.swipe_refresh);
         mVolleySingleton = VolleySingleton.getInstance(this);
+
+        //Setup database
         new AsyncTask<Void, Void, Void>() {
             @Override
             protected Void doInBackground(Void... voids) {
@@ -96,11 +106,26 @@ public class MainActivity extends AppCompatActivity
 
         //RecyclerView
         mMainRecyclerView = (RecyclerView) findViewById(R.id.main_recyclerview);
-        mMainRecyclerView.setLayoutManager(new LinearLayoutManager(this,LinearLayoutManager.VERTICAL,false));
+        LinearLayoutManager layoutManager = new LinearLayoutManager(this,LinearLayoutManager.VERTICAL,false);
+        mMainRecyclerView.setLayoutManager(layoutManager);
         mMainRecyclerView.setAdapter(new MainAdapter(new ArrayList<Item>(),this,this));
 
-        mTwoPane = findViewById(R.id.fragment_container)!=null;
+        //Endless Scroll for Main RecyclerView
+        mScrollListener = new EndlessRecyclerViewScrollListener(layoutManager) {
+            @Override
+            public void onLoadMore(int page, int totalItemsCount, RecyclerView view) {
+                addArticleToRecyclerView(page);
+            }
+        };
+        mMainRecyclerView.addOnScrollListener(mScrollListener);
 
+        //Enable swipe down refresh
+        mSwipeRefreshLayout.setOnRefreshListener(this);
+        mSwipeRefreshLayout.setRefreshing(true);
+
+        /*---------------------------------------------------------------------------------
+        // Drawer SETUP
+        ---------------------------------------------------------------------------------*/
         mDrawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
         mToggle = new ActionBarDrawerToggle(
                 this,
@@ -115,25 +140,24 @@ public class MainActivity extends AppCompatActivity
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
 
-        //Network Connection
+        /*---------------------------------------------------------------------------------
+        // Network Connection
+        ---------------------------------------------------------------------------------*/
         ConnectivityManager manager = (ConnectivityManager) getSystemService(CONNECTIVITY_SERVICE);
         NetworkInfo networkInfo = manager.getActiveNetworkInfo();
         if (networkInfo != null && networkInfo.isConnected()) {
-            getLatestNews();
+            getLatestNews(0);
         } else {
-            Snackbar.make(findViewById(R.id.drawer_layout), "No Network Connection", Snackbar.LENGTH_INDEFINITE).show();
+            mSnackbar.show();
         }
     }
 
     @Override
     public void onItemSelected(int id) {
         //// TODO: 11/30/16 start detail activity if not in tablet else start detail fragment
-
-            Intent intent = new Intent(this, DetailActivity.class);
-            intent.putExtra("id", id);
-            startActivity(intent);
-
-
+        Intent intent = new Intent(this, DetailActivity.class);
+        intent.putExtra("id", id);
+        startActivity(intent);
     }
 
     /*---------------------------------------------------------------------------------
@@ -141,22 +165,29 @@ public class MainActivity extends AppCompatActivity
     ---------------------------------------------------------------------------------*/
     @Override
     public boolean onNavigationItemSelected(@NonNull MenuItem item) {
-        mProgressBar.setVisibility(View.VISIBLE);
+        mSwipeRefreshLayout.setRefreshing(true);
+        SharedPreferences sharedPreferences = getSharedPreferences(getString(R.string.preference_current_filter),MODE_PRIVATE);
         switch (item.getItemId()){
+            //Grab the latest news
             case R.id.latest:
-                getLatestNews();
+                getLatestNews(0);
                 mDrawerLayout.closeDrawer(GravityCompat.START);
                 getSupportActionBar().setTitle("Latest");
-                mProgressBar.setVisibility(View.GONE);
+                sharedPreferences.edit().putString(getString(R.string.current_filter),"latest").commit();
+                mSwipeRefreshLayout.setRefreshing(false);
                 return true;
+
+            //Else grab the news according to the topic selected
             default:
                 mAdapter.swapdata((String) item.getTitle());
+                mScrollListener.resetState();
                 mDrawerLayout.closeDrawer(GravityCompat.START);
                 mMainRecyclerView.scrollToPosition(0);
                 if (getSupportActionBar()!=null) {
                     getSupportActionBar().setTitle(item.getTitle());
                 }
-                mProgressBar.setVisibility(View.GONE);
+                sharedPreferences.edit().putString(getString(R.string.current_filter), (String) item.getTitle()).commit();
+                mSwipeRefreshLayout.setRefreshing(false);
                 return true;
         }
     }
@@ -178,9 +209,24 @@ public class MainActivity extends AppCompatActivity
         switch (item.getItemId()) {
             case R.id.alarm_settings:
             case R.id.topic_setting:
-                Intent intent = new Intent(this,SettingActivity.class);
-                intent.putExtra("setting",item.getTitle());
-                startActivity(intent);
+                if (mTwoPane){
+                    if (item.getTitle().equals(getString(R.string.topic_filter))){
+                        getSupportFragmentManager()
+                                .beginTransaction()
+                                .replace(R.id.fragment_container,new TopicFilterFragment())
+                                .commit();
+                    }else{
+
+                        getSupportFragmentManager()
+                                .beginTransaction()
+                                .replace(R.id.fragment_container,new NotificationFragment())
+                                .commit();
+                    }
+                }else {
+                    Intent intent = new Intent(this, SettingActivity.class);
+                    intent.putExtra("setting", item.getTitle());
+                    startActivity(intent);
+                }
                 return true;
             case R.id.search:
                 return true;
@@ -192,15 +238,22 @@ public class MainActivity extends AppCompatActivity
     /*---------------------------------------------------------------------------------
     // Helper Method
     ---------------------------------------------------------------------------------*/
-    public void getLatestNews(){
-        String url = "http://www.vice.com/api/getlatest/";
+
+    /**
+     * Grab the latest news with selected page
+     * @param page current page to grab
+     */
+    private void getLatestNews(int page){
+        String url = "http://www.vice.com/api/getlatest/"+page;
+        SharedPreferences sharedPreferences = getSharedPreferences(getString(R.string.preference_current_filter),MODE_PRIVATE);
+        sharedPreferences.edit().putString(getString(R.string.current_filter),"latest").commit();
 
         StringRequest request = new StringRequest(Request.Method.GET, url,
                 new Response.Listener<String>() {
                     @Override
                     public void onResponse(String response) {
 
-                        mProgressBar.setVisibility(View.GONE);
+                        mSwipeRefreshLayout.setRefreshing(false);
 
                         //Extracting data
                         GsonArticle gsonArticle = new Gson().fromJson(response, GsonArticle.class);
@@ -214,12 +267,68 @@ public class MainActivity extends AppCompatActivity
                 new Response.ErrorListener() {
                     @Override
                     public void onErrorResponse(VolleyError error) {
+                        mSwipeRefreshLayout.setRefreshing(false);
                         Toast.makeText(MainActivity.this, "Error getting articles", Toast.LENGTH_SHORT).show();
                     }
                 });
 
         mVolleySingleton.addToRequestQueue(request);
     }
+
+    /**
+     * Helper method for adding article to recyclerview while scrolling
+     * @param page
+     */
+    private void addArticleToRecyclerView(int page){
+        SharedPreferences sharedPreferences = getSharedPreferences(getString(R.string.preference_current_filter),MODE_PRIVATE);
+        String currentFilter = sharedPreferences.getString(getString(R.string.current_filter),null);
+        String url = "http://www.vice.com/api/getlatest/";
+        if (currentFilter!=null){
+            if(currentFilter.equals("latest")) {
+                url+=page;
+            }else{
+                url+="category/"+currentFilter+"/"+page;
+            }
+        }
+        StringRequest request = new StringRequest(Request.Method.GET, url,
+                new Response.Listener<String>() {
+                    @Override
+                    public void onResponse(String response) {
+
+                        //Extracting data
+                        GsonArticle gsonArticle = new Gson().fromJson(response,GsonArticle.class);
+                        List<Item> items = gsonArticle.getData().getItems();
+
+                        //Setup up adapter to recycler view
+                        mAdapter.addData(items);
+                    }
+                },
+                new Response.ErrorListener() {
+                    @Override
+                    public void onErrorResponse(VolleyError error) {
+                        Toast.makeText(getApplicationContext(), "Error getting articles", Toast.LENGTH_SHORT).show();
+                    }
+                });
+        VolleySingleton.getInstance(this).addToRequestQueue(request);
+
+    }
+
+    //When refresh is initiated by swiping down at the very top
+    @Override
+    public void onRefresh() {
+        SharedPreferences sharedPreferences = getSharedPreferences(getString(R.string.preference_current_filter),MODE_PRIVATE);
+        String currentFilter = sharedPreferences.getString(getString(R.string.current_filter),null);
+        if (currentFilter!=null){
+            if(currentFilter.equals("latest")) {
+                getLatestNews(0);
+            }else{
+                mAdapter.swapdata(currentFilter);
+                mScrollListener.resetState();
+            }
+        }
+        mSwipeRefreshLayout.setRefreshing(false);
+    }
+
     @Override
     protected void onDestroy() {
         super.onDestroy();
