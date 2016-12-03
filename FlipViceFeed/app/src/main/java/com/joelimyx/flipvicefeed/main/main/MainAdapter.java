@@ -1,7 +1,10 @@
 package com.joelimyx.flipvicefeed.main.main;
 
+import android.app.Activity;
+import android.app.ActivityOptions;
 import android.content.Context;
 import android.content.Intent;
+import android.os.Build;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -16,7 +19,7 @@ import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
 import com.google.gson.Gson;
-import com.joelimyx.flipvicefeed.DetailView.DetailActivity;
+import com.joelimyx.flipvicefeed.detailview.DetailActivity;
 import com.joelimyx.flipvicefeed.R;
 import com.joelimyx.flipvicefeed.classes.GsonArticle;
 import com.joelimyx.flipvicefeed.classes.Item;
@@ -33,8 +36,6 @@ public class MainAdapter extends RecyclerView.Adapter<MainAdapter.MainViewHolder
     private List<Item> mArticleList;
     private OnItemSelectedListener mListener;
     private Context mContext;
-    private int mPageCount;
-    private String mPath;
 
     interface OnItemSelectedListener{
         void onItemSelected(int id);
@@ -44,8 +45,6 @@ public class MainAdapter extends RecyclerView.Adapter<MainAdapter.MainViewHolder
         mArticleList = articleList;
         mListener = listener;
         mContext = context;
-        mPageCount = 0;
-        mPath = "latest";
     }
 
     @Override
@@ -57,6 +56,7 @@ public class MainAdapter extends RecyclerView.Adapter<MainAdapter.MainViewHolder
 
     @Override
     public void onBindViewHolder(MainViewHolder holder, final int position) {
+
         holder.mTitleText.setText(mArticleList.get(position).getTitle());
         Picasso.with(mContext).setLoggingEnabled(true);
         Picasso.with(mContext)
@@ -78,7 +78,6 @@ public class MainAdapter extends RecyclerView.Adapter<MainAdapter.MainViewHolder
     }
 
     public void swapdata(String path){
-        mPageCount = 0;
         String url = "http://vice.com/api/getlatest/category/"+path;
         mArticleList.clear();
 

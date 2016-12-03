@@ -1,4 +1,4 @@
-package com.joelimyx.flipvicefeed.DetailView.Adapters_Holders;
+package com.joelimyx.flipvicefeed.detailview.adapters_holders;
 
 import android.content.Context;
 import android.graphics.Picture;
@@ -13,10 +13,10 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
 
-import com.joelimyx.flipvicefeed.DetailView.ArticleObjectData.ArticleObject;
-import com.joelimyx.flipvicefeed.DetailView.ArticleObjectData.Image;
-import com.joelimyx.flipvicefeed.DetailView.ArticleObjectData.Text;
-import com.joelimyx.flipvicefeed.DetailView.DetailActivity;
+import com.joelimyx.flipvicefeed.detailview.articleobjectdata.ArticleObject;
+import com.joelimyx.flipvicefeed.detailview.articleobjectdata.Image;
+import com.joelimyx.flipvicefeed.detailview.articleobjectdata.Text;
+import com.joelimyx.flipvicefeed.detailview.DetailActivity;
 import com.joelimyx.flipvicefeed.R;
 import com.joelimyx.flipvicefeed.main.main.MainActivity;
 import com.squareup.picasso.Picasso;

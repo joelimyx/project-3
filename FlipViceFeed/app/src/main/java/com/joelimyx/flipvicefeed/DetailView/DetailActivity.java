@@ -1,8 +1,9 @@
-package com.joelimyx.flipvicefeed.DetailView;
+package com.joelimyx.flipvicefeed.detailview;
 
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
+import android.support.design.widget.CollapsingToolbarLayout;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
@@ -10,7 +11,9 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
+import android.view.MenuItem;
 import android.view.View;
+import android.widget.ImageView;
 import android.widget.Toast;
 
 import com.android.volley.Request;
@@ -23,14 +26,15 @@ import com.facebook.share.model.ShareLinkContent;
 import com.facebook.share.widget.ShareButton;
 import com.facebook.share.widget.ShareDialog;
 import com.google.gson.Gson;
-import com.joelimyx.flipvicefeed.DetailView.Adapters_Holders.ArticleInfoAdapter;
-import com.joelimyx.flipvicefeed.DetailView.ArticleObjectData.ArticleObject;
-import com.joelimyx.flipvicefeed.DetailView.ArticleObjectData.Image;
-import com.joelimyx.flipvicefeed.DetailView.ArticleObjectData.Text;
-import com.joelimyx.flipvicefeed.DetailView.IndividualArticleData.Article;
-import com.joelimyx.flipvicefeed.DetailView.IndividualArticleData.ArticleData;
-import com.joelimyx.flipvicefeed.DetailView.IndividualArticleData.Example;
+import com.joelimyx.flipvicefeed.detailview.adapters_holders.ArticleInfoAdapter;
+import com.joelimyx.flipvicefeed.detailview.articleobjectdata.ArticleObject;
+import com.joelimyx.flipvicefeed.detailview.articleobjectdata.Image;
+import com.joelimyx.flipvicefeed.detailview.articleobjectdata.Text;
+import com.joelimyx.flipvicefeed.detailview.individualarticledata.Article;
+import com.joelimyx.flipvicefeed.detailview.individualarticledata.ArticleData;
+import com.joelimyx.flipvicefeed.detailview.individualarticledata.Example;
 import com.joelimyx.flipvicefeed.R;
+import com.squareup.picasso.Picasso;
 import com.joelimyx.flipvicefeed.main.data.ShareGsonRootObject;
 import com.joelimyx.flipvicefeed.main.data.ShareItem;
 import com.joelimyx.flipvicefeed.classes.VolleySingleton;
@@ -51,6 +55,8 @@ public class DetailActivity extends AppCompatActivity {
     ArticleInfoAdapter mAdapter;
     VolleySingleton mVolleySingleton;
     List<ArticleObject> mListOfObjectsInArticle;
+    CollapsingToolbarLayout mToolbarLayout;
+    ImageView mToolbarBackground;
 
     public static final String TAG = "DETAIL ACTIVITY";
 
@@ -60,7 +66,11 @@ public class DetailActivity extends AppCompatActivity {
         setContentView(R.layout.activity_detail);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        getSupportActionBar().setHomeButtonEnabled(true);
 
+        mToolbarLayout = (CollapsingToolbarLayout)findViewById(R.id.toolbar_layout);
+        mToolbarBackground = (ImageView)findViewById(R.id.toolbar_image);
         mVolleySingleton = VolleySingleton.getInstance(this);
 
         //RECIEVE ID FROM MainActivity
@@ -92,19 +102,28 @@ public class DetailActivity extends AppCompatActivity {
         StringRequest stringRequest = new StringRequest(Request.Method.GET, fullURL, new Response.Listener<String>() {
             @Override
             public void onResponse(String response) {
-                Log.d(TAG, "onResponse: recieved response" + response);
+                Log.d(TAG, "onResponse: recieved response: " + response);
 
                 Example gsonArticle = new Gson().fromJson(response, Example.class);
-                Log.d(TAG, "onResponse: GSON created" + gsonArticle.toString());
+                Log.d(TAG, "onResponse: GSON created: " + gsonArticle.toString());
 
                 ArticleData articleData = gsonArticle.getData();
-                Log.d(TAG, "onResponse: ARTICLE DATA pulled from GSON" + articleData);
+                Log.d(TAG, "onResponse: ARTICLE DATA pulled from GSON: " + articleData);
 
                 Article article = articleData.getArticle();
-                Log.d(TAG, "onResponse: ARTICLE from ARTICLE DATA" + article);
+                Log.d(TAG, "onResponse: ARTICLE from ARTICLE DATA: " + article);
 
                 String body = article.getBody();
-                Log.d(TAG, "onResponse: BODY pulled from ARTICLE" + body);
+                Log.d(TAG, "onResponse: BODY pulled from ARTICLE: " + body);
+
+                String title = article.getTitle();
+                Log.d(TAG, "onResponse: TITLE pulled from ARTICLE: " + title);
+
+                String imgURL = article.getThumb();
+                Log.d(TAG, "onResponse: THUMBNAIL pulled from ARTICLE: " + imgURL);
+
+                setTitle(title,imgURL); //SENDS TITLE AND IMAGE TO THE TOOLBAR
+
 
                 //SEND TO getDataFromHTML() TO PARSE HTML
                 getDataFromHTML(body);
@@ -138,7 +157,9 @@ public class DetailActivity extends AppCompatActivity {
                 fullList.add(text);   //ADDS TO LIST
 
                 //CHECKS FOR EMPTY .text(), AND A POPULATED .html() WHICH SHOWS OTHER CONTENT(IMGS,VIDEOS) ON SCREEN
-            }else if (e.text().equals("") && !e.html().equals("")){
+                //ALSO CHECKS IF THIS IMAGE WILL BE FIRST INTO fullList
+                //IGNORES IF LIST IS EMPTY B/C THE TOP OF DETAIL PAGE GETS THIS IMAGE SO WE CAN AVOID DOUBLE IMAGES AT THE TOP OF THE PAGE
+            }else if (e.text().equals("") && !e.html().equals("") && !fullList.isEmpty()){
 
                 //CHECKS TO SEE IF THERE ARE NO <iframe> OBJECTS IN THE HTML
                 if (!e.html().contains("<iframe") && !e.html().contains("<br>")) {
@@ -171,6 +192,15 @@ public class DetailActivity extends AppCompatActivity {
 
         populateList(fullList); //CALLS populateList()
         return null;
+    }
+
+    //SETS TITLE AND IMAGE TO THE TOOLBAR
+    public void setTitle(String title, String imgURL){
+        Picasso.with(this)
+                .load(imgURL)
+                .fit()
+                .into(mToolbarBackground);
+        mToolbarLayout.setTitle(title);
     }
 
     public void populateList(List<ArticleObject> list){

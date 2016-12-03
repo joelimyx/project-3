@@ -1,14 +1,22 @@
 package com.joelimyx.flipvicefeed.main.main;
 
+import android.app.Activity;
+import android.app.ActivityOptions;
+import android.content.Intent;
+import android.app.SearchManager;
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.AsyncTask;
+import android.os.Build;
 import android.support.annotation.NonNull;
 import android.support.design.widget.NavigationView;
 import android.support.design.widget.Snackbar;
+import android.support.v4.util.Pair;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v4.widget.SwipeRefreshLayout;
@@ -31,10 +39,9 @@ import com.android.volley.toolbox.StringRequest;
 
 import com.facebook.FacebookSdk;
 import com.google.gson.Gson;
-import com.joelimyx.flipvicefeed.DetailView.DetailActivity;
+import com.joelimyx.flipvicefeed.detailview.DetailActivity;
 import com.joelimyx.flipvicefeed.R;
 import com.joelimyx.flipvicefeed.database.DBAssetHelper;
-import com.joelimyx.flipvicefeed.main.network.NetworkStateReceiver;
 import com.joelimyx.flipvicefeed.classes.GsonArticle;
 import com.joelimyx.flipvicefeed.classes.Item;
 import com.joelimyx.flipvicefeed.classes.VolleySingleton;
@@ -57,6 +64,8 @@ public class MainActivity extends AppCompatActivity
     private boolean mTwoPane;
     private VolleySingleton mVolleySingleton;
     private NetworkStateReceiver mNetworkStateReceiver;
+    private Snackbar mSnackbar;
+
     private SwipeRefreshLayout mSwipeRefreshLayout;
     private EndlessRecyclerViewScrollListener mScrollListener;
     private static final String TAG = "MainActivity";
@@ -81,6 +90,8 @@ public class MainActivity extends AppCompatActivity
                 return null;
             }
         }.execute();
+
+        mSnackbar = Snackbar.make(findViewById(R.id.drawer_layout), "No Network Available", Snackbar.LENGTH_INDEFINITE);
 
         //Toolbar
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
@@ -137,7 +148,7 @@ public class MainActivity extends AppCompatActivity
         if (networkInfo != null && networkInfo.isConnected()) {
             getLatestNews(0);
         } else {
-            Snackbar.make(findViewById(R.id.drawer_layout), "No Network Connection", Snackbar.LENGTH_INDEFINITE).show();
+            mSnackbar.show();
         }
     }
 
@@ -324,6 +335,26 @@ public class MainActivity extends AppCompatActivity
         // Unregisters BroadcastReceiver when app is destroyed.
         if (mNetworkStateReceiver != null) {
             this.unregisterReceiver(mNetworkStateReceiver);
+        }
+    }
+
+
+    public class NetworkStateReceiver extends BroadcastReceiver {
+
+        private static final String TAG = "NetworkStateReceiver";
+
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            Log.d(TAG, "onReceive: ");
+            ConnectivityManager conn = (ConnectivityManager)
+                    context.getSystemService(Context.CONNECTIVITY_SERVICE);
+            NetworkInfo networkInfo = conn.getActiveNetworkInfo();
+
+            if (networkInfo == null) {
+                mSnackbar.show();
+            } else {
+                mSnackbar.dismiss();
+            }
         }
     }
 }
