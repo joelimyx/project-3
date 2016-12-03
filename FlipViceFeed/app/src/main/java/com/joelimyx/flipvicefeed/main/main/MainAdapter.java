@@ -70,9 +70,6 @@ public class MainAdapter extends RecyclerView.Adapter<MainAdapter.MainViewHolder
                 mListener.onItemSelected(mArticleList.get(position).getId());
             }
         });
-        if (position == getItemCount()-1){
-            addData(mPath);
-        }
     }
 
     @Override
@@ -108,36 +105,12 @@ public class MainAdapter extends RecyclerView.Adapter<MainAdapter.MainViewHolder
         VolleySingleton.getInstance(mContext).addToRequestQueue(request);
     }
 
-    //TODO change path dynamically
-    private void addData(String path){
-        mPageCount++;
-        String url = "http://www.vice.com/api/getlatest/"+mPageCount;
-        StringRequest request = new StringRequest(Request.Method.GET, url,
-                new Response.Listener<String>() {
-                    @Override
-                    public void onResponse(String response) {
-
-                        //Extracting data
-                        GsonArticle gsonArticle = new Gson().fromJson(response,GsonArticle.class);
-                        List<Item> items = gsonArticle.getData().getItems();
-
-                        //Setup up adapter to recycler view
-                        mArticleList.addAll(items);
-                        notifyDataSetChanged();
-                    }
-                },
-                new Response.ErrorListener() {
-                    @Override
-                    public void onErrorResponse(VolleyError error) {
-                        Toast.makeText(mContext, "Error getting articles", Toast.LENGTH_SHORT).show();
-                    }
-                });
-        VolleySingleton.getInstance(mContext).addToRequestQueue(request);
-
+    public void addData(List<Item> addedItems){
+        int start = getItemCount();
+        mArticleList.addAll(addedItems);
+        notifyItemRangeInserted(start,addedItems.size());
     }
-    public void setPath(String path){
-        mPath = path;
-    }
+
 
     class MainViewHolder extends RecyclerView.ViewHolder{
         private TextView mTitleText;
