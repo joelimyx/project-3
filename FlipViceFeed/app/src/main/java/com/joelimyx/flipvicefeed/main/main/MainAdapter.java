@@ -1,6 +1,10 @@
 package com.joelimyx.flipvicefeed.main.main;
 
+import android.app.Activity;
+import android.app.ActivityOptions;
 import android.content.Context;
+import android.content.Intent;
+import android.os.Build;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -15,10 +19,11 @@ import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
 import com.google.gson.Gson;
+import com.joelimyx.flipvicefeed.detailview.DetailActivity;
 import com.joelimyx.flipvicefeed.R;
-import com.joelimyx.flipvicefeed.main.data.GsonArticle;
-import com.joelimyx.flipvicefeed.main.data.Item;
-import com.joelimyx.flipvicefeed.main.data.VolleySingleton;
+import com.joelimyx.flipvicefeed.classes.GsonArticle;
+import com.joelimyx.flipvicefeed.classes.Item;
+import com.joelimyx.flipvicefeed.classes.VolleySingleton;
 import com.squareup.picasso.Picasso;
 
 import java.util.List;
@@ -75,6 +80,7 @@ public class MainAdapter extends RecyclerView.Adapter<MainAdapter.MainViewHolder
     public void swapdata(String path){
         String url = "http://vice.com/api/getlatest/category/"+path;
         mArticleList.clear();
+
         StringRequest request = new StringRequest(Request.Method.GET, url,
                 new Response.Listener<String>() {
                     @Override
@@ -98,10 +104,18 @@ public class MainAdapter extends RecyclerView.Adapter<MainAdapter.MainViewHolder
         VolleySingleton.getInstance(mContext).addToRequestQueue(request);
     }
 
+    public void addData(List<Item> addedItems){
+        int start = getItemCount();
+        mArticleList.addAll(addedItems);
+        notifyItemRangeInserted(start,addedItems.size());
+    }
+
+
     class MainViewHolder extends RecyclerView.ViewHolder{
         private TextView mTitleText;
         private ImageView mArticleImage;
         private FrameLayout mArticleItemLayout;
+
         public MainViewHolder(View itemView) {
             super(itemView);
             mTitleText = (TextView) itemView.findViewById(R.id.article_item_title);
