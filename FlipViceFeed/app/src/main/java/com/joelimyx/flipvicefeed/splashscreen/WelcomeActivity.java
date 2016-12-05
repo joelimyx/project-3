@@ -18,7 +18,7 @@ public class WelcomeActivity extends AppCompatActivity
         setContentView(R.layout.activity_welcome);
 
         vp = (ViewPager) findViewById(R.id.welcome_viewpager);
-        SplashPager sp = new SplashPager(getSupportFragmentManager());
+        SplashPagerAdapter sp = new SplashPagerAdapter(getSupportFragmentManager());
         vp.setAdapter(sp);
 
     }

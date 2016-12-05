@@ -10,8 +10,8 @@ import android.support.v4.view.ViewPager;
  * Created by KorbBookProReturns on 12/4/16.
  */
 
-public class SplashPager extends FragmentPagerAdapter {
-    public SplashPager(FragmentManager fm) {
+public class SplashPagerAdapter extends FragmentPagerAdapter {
+    public SplashPagerAdapter(FragmentManager fm) {
         super(fm);
     }
 
