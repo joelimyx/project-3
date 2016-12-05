@@ -12,6 +12,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.CheckBox;
+import android.widget.TextView;
 import android.widget.TimePicker;
 import android.widget.Toast;
 
@@ -83,6 +84,14 @@ public class NotificationsFragment extends Fragment {
 
         final AlarmService alarmService = new AlarmService(getContext(),ALARM_ID);
 
+        TextView skipThisStep = (TextView)view.findViewById(R.id.skip_button);
+        skipThisStep.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                ((Activity)getContext()).finish();
+            }
+        });
+
         Button button = (Button)view.findViewById(R.id.testList);
         button.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -94,19 +103,22 @@ public class NotificationsFragment extends Fragment {
 
                 AlarmSQLHelper helper = AlarmSQLHelper.getInstance(getContext());
 
+                //If this is 0,
                 int notificationSwitchInitializer = 0;
                 for (int i = 0; i < 7; i++) {
                     if (mCheckList.get(i).isChecked()){
                         helper.updateDaysAndTime(hour,minute,i);
                         alarmService.startAlarm(hour,minute,i);
                         if(notificationSwitchInitializer == 0){
-                            SharedPreferences sharedPreferences = view.getContext().getSharedPreferences("notification on or off", Context.MODE_PRIVATE);
-                            final SharedPreferences.Editor editor = sharedPreferences.edit();
-                            editor.putBoolean(getString(R.string.saved_switch_state),true);
-                            editor.commit();
                             notificationSwitchInitializer++;
                         }
                     } else {
+                        if(notificationSwitchInitializer == 1) {
+                            SharedPreferences sharedPreferences = view.getContext().getSharedPreferences("notification on or off", Context.MODE_PRIVATE);
+                            final SharedPreferences.Editor editor = sharedPreferences.edit();
+                            editor.putBoolean(getString(R.string.saved_switch_state), true);
+                            editor.commit();
+                        }
                         helper.updateDaysAndTime(-1,-1,i);
                     }
                 }

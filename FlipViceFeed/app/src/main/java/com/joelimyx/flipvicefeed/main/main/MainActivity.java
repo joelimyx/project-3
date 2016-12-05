@@ -78,19 +78,16 @@ public class MainActivity extends AppCompatActivity
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        //Show welcome screen on first run
         Boolean isFirstRun = getSharedPreferences("PREFERENCE", MODE_PRIVATE)
                 .getBoolean(SPLASH_BOOLEAN, true);
 
         if (isFirstRun) {
-            //show start activity
-
             startActivity(new Intent(MainActivity.this, WelcomeActivity.class));
-            Toast.makeText(MainActivity.this, "First Run", Toast.LENGTH_LONG)
-                    .show();
         }
 
-//        getSharedPreferences("PREFERENCE", MODE_PRIVATE).edit()
-//                .putBoolean(SPLASH_BOOLEAN, false).commit();
+        getSharedPreferences("PREFERENCE", MODE_PRIVATE).edit()
+                .putBoolean(SPLASH_BOOLEAN, false).commit();
 
         //Reference
         mTwoPane = findViewById(R.id.fragment_container)!=null;
