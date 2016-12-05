@@ -22,6 +22,10 @@ import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
+import com.facebook.CallbackManager;
+import com.facebook.FacebookCallback;
+import com.facebook.FacebookException;
+import com.facebook.share.Sharer;
 import com.facebook.share.model.ShareLinkContent;
 import com.facebook.share.widget.ShareButton;
 import com.facebook.share.widget.ShareDialog;
@@ -57,6 +61,8 @@ public class DetailActivity extends AppCompatActivity {
     List<ArticleObject> mListOfObjectsInArticle;
     CollapsingToolbarLayout mToolbarLayout;
     ImageView mToolbarBackground;
+    CallbackManager mCallbackManager;
+    ShareDialog mShareDialog;
 
     public static final String TAG = "DETAIL ACTIVITY";
 
@@ -64,6 +70,29 @@ public class DetailActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_detail);
+
+        /*---------------------------------------------------------------------------------
+        // Facebook Callback manager to show Toast
+        ---------------------------------------------------------------------------------*/
+        mCallbackManager = CallbackManager.Factory.create();
+        mShareDialog = new ShareDialog(this);
+        mShareDialog.registerCallback(mCallbackManager, new FacebookCallback<Sharer.Result>() {
+            @Override
+            public void onSuccess(Sharer.Result result) {
+                Toast.makeText(DetailActivity.this, "Article Shared!", Toast.LENGTH_SHORT).show();
+            }
+
+            @Override
+            public void onCancel() {
+                Toast.makeText(DetailActivity.this, "Canceled", Toast.LENGTH_SHORT).show();
+            }
+
+            @Override
+            public void onError(FacebookException error) {
+                Toast.makeText(DetailActivity.this, "Error Sharing", Toast.LENGTH_SHORT).show();
+            }
+        });
+
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
@@ -244,12 +273,11 @@ public class DetailActivity extends AppCompatActivity {
                 .build();
 
         shareButton.setShareContent(fbShare);
+    }
 
-        shareButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                ShareDialog.show(DetailActivity.this,fbShare);
-            }
-        });
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        mCallbackManager.onActivityResult(requestCode,resultCode,data);
     }
 }
