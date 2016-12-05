@@ -41,8 +41,6 @@ public class NotificationService extends JobService {
     public static final String SEE_NEW_STORIES = "New stories in ";
     public static final String PACKAGE_NAME = "com.joelimyx.flipvicefeed";
     public static final int NOTIFICATION_ID = 0;
-    private Notification mNotification;
-    private AsyncTask mTask;
     private List<Item> mArticleList;
     private TopicObject mRandomFavorite;
 
