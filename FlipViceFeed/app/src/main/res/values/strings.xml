@@ -13,4 +13,6 @@
     <string name="current_filter">current filter</string>
 
     <string name="skip_this_step"><u>Skip this step</u></string>
+    <string name="main_to_detail">main2detail</string>
+    <string name="app_bar_transition">app_bar_transition</string>
 </resources>
