@@ -64,11 +64,10 @@ public class MainActivity extends AppCompatActivity
     private boolean mTwoPane;
     private VolleySingleton mVolleySingleton;
     private NetworkStateReceiver mNetworkStateReceiver;
-    private Snackbar mSnackbar;
+    private static Snackbar mSnackbar;
 
     private SwipeRefreshLayout mSwipeRefreshLayout;
     private EndlessRecyclerViewScrollListener mScrollListener;
-    private static final String TAG = "MainActivity";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -98,11 +97,6 @@ public class MainActivity extends AppCompatActivity
         setSupportActionBar(toolbar);
         getSupportActionBar().setDefaultDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setTitle("Latest");
-
-        //Registers Broadcast Receiver to Track Network Change
-        IntentFilter filter = new IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION);
-        mNetworkStateReceiver = new NetworkStateReceiver();
-        this.registerReceiver(mNetworkStateReceiver, filter);
 
         //RecyclerView
         mMainRecyclerView = (RecyclerView) findViewById(R.id.main_recyclerview);
@@ -193,8 +187,8 @@ public class MainActivity extends AppCompatActivity
     }
 
     /*---------------------------------------------------------------------------------
-        // Toolbar AREA
-        ---------------------------------------------------------------------------------*/
+    // Toolbar AREA
+    ---------------------------------------------------------------------------------*/
     //Inflate Toolbar
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -236,7 +230,26 @@ public class MainActivity extends AppCompatActivity
     }
 
     /*---------------------------------------------------------------------------------
-    // Helper Method
+    // SwipeRefreshLayout AREA
+    ---------------------------------------------------------------------------------*/
+    //When refresh is initiated by swiping down at the very top
+    @Override
+    public void onRefresh() {
+        SharedPreferences sharedPreferences = getSharedPreferences(getString(R.string.preference_current_filter),MODE_PRIVATE);
+        String currentFilter = sharedPreferences.getString(getString(R.string.current_filter),null);
+        if (currentFilter!=null){
+            if(currentFilter.equals("latest")) {
+                getLatestNews(0);
+            }else{
+                mAdapter.swapdata(currentFilter);
+                mScrollListener.resetState();
+            }
+        }
+        mSwipeRefreshLayout.setRefreshing(false);
+    }
+
+    /*---------------------------------------------------------------------------------
+    // Helper Method AREA
     ---------------------------------------------------------------------------------*/
 
     /**
@@ -313,39 +326,14 @@ public class MainActivity extends AppCompatActivity
 
     }
 
-    //When refresh is initiated by swiping down at the very top
-    @Override
-    public void onRefresh() {
-        SharedPreferences sharedPreferences = getSharedPreferences(getString(R.string.preference_current_filter),MODE_PRIVATE);
-        String currentFilter = sharedPreferences.getString(getString(R.string.current_filter),null);
-        if (currentFilter!=null){
-            if(currentFilter.equals("latest")) {
-                getLatestNews(0);
-            }else{
-                mAdapter.swapdata(currentFilter);
-                mScrollListener.resetState();
-            }
-        }
-        mSwipeRefreshLayout.setRefreshing(false);
-    }
-
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
-        // Unregisters BroadcastReceiver when app is destroyed.
-        if (mNetworkStateReceiver != null) {
-            this.unregisterReceiver(mNetworkStateReceiver);
-        }
-    }
-
-
-    public class NetworkStateReceiver extends BroadcastReceiver {
-
-        private static final String TAG = "NetworkStateReceiver";
+    /*---------------------------------------------------------------------------------
+    // Network State AREA
+    ---------------------------------------------------------------------------------*/
+    //Network State Listener to show or dismiss snackbar
+    public static class NetworkStateReceiver extends BroadcastReceiver {
 
         @Override
         public void onReceive(Context context, Intent intent) {
-            Log.d(TAG, "onReceive: ");
             ConnectivityManager conn = (ConnectivityManager)
                     context.getSystemService(Context.CONNECTIVITY_SERVICE);
             NetworkInfo networkInfo = conn.getActiveNetworkInfo();
