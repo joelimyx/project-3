@@ -122,7 +122,6 @@ public class DetailActivity extends AppCompatActivity {
 
                 setTitle(title,mToolbarBackgroundImage); //SENDS TITLE AND IMAGE TO THE TOOLBAR
 
-
                 //SEND TO getDataFromHTML() TO PARSE HTML
                 getDataFromHTML(body);
 
@@ -141,6 +140,7 @@ public class DetailActivity extends AppCompatActivity {
     private String getDataFromHTML(String html){
         //CREATE JSOUP DOCUMENT FROM THE HTML
         org.jsoup.nodes.Document doc = Jsoup.parse(html);
+
         //GETS LIST OF  <p> ELEMENTS FROM DOCUMENT
         Elements textFromHTML = doc.select("p");
 
@@ -150,7 +150,7 @@ public class DetailActivity extends AppCompatActivity {
         for (org.jsoup.nodes.Element e: textFromHTML){
             if (!e.text().equals("")) {//FINDS ELEMENTS WITH READABLE TEXT ON SCREEN
                 if (!e.html().contains("<img src=")) {
-                    if (e.hasClass("photo-credit")){
+                    if (e.hasClass("photo-credit")){  //CHECKS TO SEE IF THE TEXT IS A PHOTO CREDIT CLASS AND SEPARATES
                         String photoCredit = e.text();
                         PhotoCredit credit = new PhotoCredit(photoCredit);
                         fullList.add(credit);
@@ -160,7 +160,7 @@ public class DetailActivity extends AppCompatActivity {
 
                         fullList.add(text);   //ADDS TO LIST
                     }
-                }else {
+                }else {  //IF HTML HAS BOTH IMAGE AND PHOTO CREDIT TEXT IT LOCATES AND SEPARATES
                     String imgSrc = e.html();
                     int indexStart = imgSrc.indexOf("http");
                     int indexEnd = imgSrc.indexOf("\" ");
@@ -173,7 +173,6 @@ public class DetailActivity extends AppCompatActivity {
                     PhotoCredit credit = new PhotoCredit(photoCredit);
                     fullList.add(credit);
                 }
-
 
                 //CHECKS FOR EMPTY .text(), AND A POPULATED .html() WHICH SHOWS OTHER CONTENT(IMGS,VIDEOS) ON SCREEN
                 //ALSO CHECKS IF THIS IMAGE WILL BE FIRST INTO fullList
@@ -192,7 +191,7 @@ public class DetailActivity extends AppCompatActivity {
 
                         Image image  = new Image(ahrefLink);
                         fullList.add(image);
-                    }else {
+                    }else if (!e.html().contains("<p href")){
 
                         String photoHTML = null;
                         String photoLink = e.html();
@@ -211,16 +210,13 @@ public class DetailActivity extends AppCompatActivity {
                         Log.d(TAG, "getDataFromHTML: INDEX OF \" : " );
                         //SERIES OF CHECKS TO ENSURE ACCURACY OF PARSER
                     }
-
-
-
                 }
             }
             Log.d(TAG, "getDataFromHTML: TEXT: " + e.text());
             Log.d(TAG, "getDataFromHTML: HTML: " + e.html());
         }
 
-        Elements iframeList = doc.select("div");
+        Elements iframeList = doc.select("div");    //LOCATES AND EXTRACTS VIDEO LINKS AND OTHER IFRAME LINKS
         List<ArticleObject> iFrameList = new ArrayList<>();
         for (Element e: iframeList){
             Log.d(TAG, "getDataFromHTML: ****iframeHTML***  " + e.html());
@@ -249,6 +245,7 @@ public class DetailActivity extends AppCompatActivity {
         populateList(fullList); //CALLS populateList()
         return null;
     }
+
 
     //SETS TITLE AND IMAGE TO THE TOOLBAR
     public void setTitle(String title, String imgURL){
