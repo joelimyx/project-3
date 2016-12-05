@@ -49,25 +49,37 @@ public class NotificationService extends JobService {
     @Override
     public boolean onStartJob(JobParameters jobParameters) {
 
+        new AsyncTask<Void,Void,Void>(){
+            @Override
+            protected Void doInBackground(Void... voids) {
                 List<TopicObject> favoriteTopics = AlarmSQLHelper.getInstance(getApplicationContext()).getFavoriteTopics();
                 mRandomFavorite = favoriteTopics.get((int)(Math.random()*favoriteTopics.size()));
+                return null;
+            }
 
-                String url = "http://vice.com/api/getlatest/category/"+mRandomFavorite;
-                mArticleList.clear();
+            @Override
+            protected void onPostExecute(Void aVoid) {
+                String url = "http://vice.com/api/getlatest/category/"+mRandomFavorite.getTopic();
+                if (mArticleList != null) {
+                    mArticleList.clear();
+                }
+                Log.d(TAG, "onPostExecute: ");
 
                 StringRequest request = new StringRequest(Request.Method.GET, url,
                         new Response.Listener<String>() {
                             @Override
                             public void onResponse(String response) {
+                                Log.d(TAG, "onResponse: Getting items.");
                                 GsonArticle gsonArticle = new Gson().fromJson(response,GsonArticle.class);
                                 mArticleList = gsonArticle.getData().getItems();
-
+                                Log.d(TAG, "onResponse: Got the items. DOING WELL SO FAR!");
                                 RemoteViews customNotificationView = new RemoteViews(PACKAGE_NAME, R.layout.notification_bar_remoteview);
+                                Log.d(TAG, "onResponse: URI! AH!" + mArticleList.get(0).getThumb());
 
                                 customNotificationView.setImageViewUri(R.id.remote_image_background, Uri.parse(mArticleList.get(0).getThumb()));
                                 customNotificationView.setImageViewResource(R.id.remote_edgefade,R.drawable.edge_fades);
-                                customNotificationView.setTextViewText(R.id.remote_textshadow,SEE_NEW_STORIES+mRandomFavorite);
-                                customNotificationView.setTextViewText(R.id.remote_text,SEE_NEW_STORIES+mRandomFavorite);
+                                customNotificationView.setTextViewText(R.id.remote_textshadow,SEE_NEW_STORIES+mRandomFavorite.getTopic());
+                                customNotificationView.setTextViewText(R.id.remote_text,SEE_NEW_STORIES+mRandomFavorite.getTopic());
 
                                 NotificationCompat.Builder mBuilder = new NotificationCompat.Builder(getApplicationContext());
 
@@ -79,6 +91,8 @@ public class NotificationService extends JobService {
 
                                 NotificationManager notificationMan = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
                                 notificationMan.notify(NOTIFICATION_ID,notification);
+                                Log.d(TAG, "onResponse: Made it to after notifications");
+
 
                             }
                         },
@@ -91,8 +105,11 @@ public class NotificationService extends JobService {
 
                 VolleySingleton.getInstance(getApplicationContext()).addToRequestQueue(request);
 
-        jobFinished(jobParameters, true);
+            }
+        }.execute();
 
+        Log.d(TAG, "onStartJob: FINISHED?");
+        jobFinished(jobParameters, true);
         return true;
     }
 
