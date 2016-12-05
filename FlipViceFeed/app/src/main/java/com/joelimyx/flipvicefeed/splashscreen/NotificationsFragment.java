@@ -2,6 +2,7 @@ package com.joelimyx.flipvicefeed.splashscreen;
 
 import android.app.Activity;
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
@@ -80,31 +81,6 @@ public class NotificationsFragment extends Fragment {
         mCheckList.add(cFri);
         mCheckList.add(cSat);
 
-        new AsyncTask<Void, Void, Void>() {
-            @Override
-            protected Void doInBackground(Void... voids) {
-                mTimeObjectList = AlarmSQLHelper.getInstance(getContext()).getAllDaysAndTime();
-                return null;
-            }
-
-            @Override
-            protected void onPostExecute(Void aVoid) {
-                int timePickerInitializer = 0;
-                for (int i = 0; i < 7; i++) {
-                    if(mTimeObjectList.get(i).getHour() != -1){
-                        mCheckList.get(i).setChecked(true);
-                        if(timePickerInitializer == 0) {
-                            mTimePicker.setCurrentHour(mTimeObjectList.get(i).getHour());
-                            mTimePicker.setCurrentMinute(mTimeObjectList.get(i).getMinute());
-                            timePickerInitializer++;
-                        }
-                    }else{
-                        mCheckList.get(i).setChecked(false);
-                    }
-                }
-            }
-        }.execute();
-
         final AlarmService alarmService = new AlarmService(getContext(),ALARM_ID);
 
         Button button = (Button)view.findViewById(R.id.testList);
@@ -118,10 +94,18 @@ public class NotificationsFragment extends Fragment {
 
                 AlarmSQLHelper helper = AlarmSQLHelper.getInstance(getContext());
 
+                int notificationSwitchInitializer = 0;
                 for (int i = 0; i < 7; i++) {
                     if (mCheckList.get(i).isChecked()){
                         helper.updateDaysAndTime(hour,minute,i);
                         alarmService.startAlarm(hour,minute,i);
+                        if(notificationSwitchInitializer == 0){
+                            SharedPreferences sharedPreferences = view.getContext().getSharedPreferences("notification on or off", Context.MODE_PRIVATE);
+                            final SharedPreferences.Editor editor = sharedPreferences.edit();
+                            editor.putBoolean(getString(R.string.saved_switch_state),true);
+                            editor.commit();
+                            notificationSwitchInitializer++;
+                        }
                     } else {
                         helper.updateDaysAndTime(-1,-1,i);
                     }

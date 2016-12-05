@@ -6,6 +6,8 @@ import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
 
+import com.joelimyx.flipvicefeed.setting.NotificationFragment;
+
 /**
  * Created by KorbBookProReturns on 12/4/16.
  */
