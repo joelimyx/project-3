@@ -48,6 +48,7 @@ import com.joelimyx.flipvicefeed.classes.VolleySingleton;
 import com.joelimyx.flipvicefeed.setting.NotificationFragment;
 import com.joelimyx.flipvicefeed.setting.SettingActivity;
 import com.joelimyx.flipvicefeed.setting.TopicFilterFragment;
+import com.joelimyx.flipvicefeed.splashscreen.WelcomeActivity;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -69,12 +70,27 @@ public class MainActivity extends AppCompatActivity
     private SwipeRefreshLayout mSwipeRefreshLayout;
     private EndlessRecyclerViewScrollListener mScrollListener;
     private static final String TAG = "MainActivity";
+    public static final String SPLASH_BOOLEAN = "first";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         FacebookSdk.sdkInitialize(getApplicationContext());
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        Boolean isFirstRun = getSharedPreferences("PREFERENCE", MODE_PRIVATE)
+                .getBoolean(SPLASH_BOOLEAN, true);
+
+        if (isFirstRun) {
+            //show start activity
+
+            startActivity(new Intent(MainActivity.this, WelcomeActivity.class));
+            Toast.makeText(MainActivity.this, "First Run", Toast.LENGTH_LONG)
+                    .show();
+        }
+
+//        getSharedPreferences("PREFERENCE", MODE_PRIVATE).edit()
+//                .putBoolean(SPLASH_BOOLEAN, false).commit();
 
         //Reference
         mTwoPane = findViewById(R.id.fragment_container)!=null;
