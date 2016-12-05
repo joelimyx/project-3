@@ -6,20 +6,15 @@
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
     <uses-permission android:name="android.permission.INTERNET"/>
 
+
     <application
         android:allowBackup="true"
-        android:icon="@mipmap/ic_launcher"
+        android:icon="@drawable/voozicon"
         android:label="@string/app_name"
         android:supportsRtl="true"
         android:theme="@style/AppTheme.NoActionBar">
 
-
-        <activity
-            android:name=".DetailView.DetailActivity"
-            android:label="@string/title_activity_detail"
-            android:theme="@style/AppTheme.NoActionBar"
-            android:parentActivityName=".main.main.MainActivity"/>
-
+        <!-- Main Activity -->
         <activity android:name=".main.main.MainActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
@@ -28,9 +23,15 @@
             </intent-filter>
         </activity>
 
-
+        <!-- Detail Activity -->
+        <activity
+            android:name=".detailview.DetailActivity"
+            android:label=""
+            android:theme="@style/AppTheme.NoActionBar"/>
 
         <activity android:name=".notifications.AlarmSettingsActivity"/>
+
+        <!-- Setting Activity -->
         <activity
             android:name=".setting.SettingActivity"
             android:label="@string/title_activity_settings"
@@ -40,31 +41,38 @@
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="com.joelimyx.flipvicefeed.main.main.MainActivity"/>
 
-
         </activity>
-        <activity
-            android:name="com.facebook.FacebookActivity"
-            android:configChanges=
-                "keyboard|keyboardHidden|screenLayout|screenSize|orientation"
-            android:label="@string/app_name"
-            android:theme="@android:style/Theme.Translucent.NoTitleBar"
-            tools:replace="android:theme"/>
 
-        <meta-data
-            android:name="com.facebook.sdk.ApplicationId"
-            android:value="@string/facebook_app_id"/>
+        <!-- FACEBOOK -->
+        <activity android:name="com.facebook.FacebookActivity"
+                  tools:replace="android:theme"
+                  android:configChanges=
+                      "keyboard|keyboardHidden|screenLayout|screenSize|orientation"
+                  android:theme="@android:style/Theme.Translucent.NoTitleBar"
+                  android:label="@string/app_name" />
+        <meta-data android:name="com.facebook.sdk.ApplicationId"
+                   android:value="@string/facebook_app_id"/>
+        <provider android:authorities="com.facebook.app.FacebookContentProvider226865891058843"
+                  android:name="com.facebook.FacebookContentProvider"
+                  android:exported="true"/>
 
+        <!-- Network state listener -->
+        <receiver
+            android:name=".main.main.MainActivity$NetworkStateReceiver">
+            <intent-filter>
+                <action android:name="android.net.conn.CONNECTIVITY_CHANGE"/>
+            </intent-filter>
+        </receiver>
 
+        <!-- Notification and alarm-->
+        <service android:name=".notifications.NotificationService"
+                 android:permission="android.permission.BIND_JOB_SERVICE"/>
         <receiver
             android:name=".notifications.AlarmReceiver"
             android:process=":remote"/>
 
-        <provider
-            android:name="com.facebook.FacebookContentProvider"
-            android:authorities="com.facebook.app.FacebookContentProvider226865891058843"
-            android:exported="true"/>
-
-
+        <activity android:name=".splashscreen.WelcomeActivity">
+        </activity>
     </application>
 
 </manifest>

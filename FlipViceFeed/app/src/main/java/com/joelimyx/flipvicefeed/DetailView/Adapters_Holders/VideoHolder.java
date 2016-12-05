@@ -1,13 +1,10 @@
-package com.joelimyx.flipvicefeed.DetailView.Adapters_Holders;
+package com.joelimyx.flipvicefeed.detailview.adapters_holders;
 
 import android.content.Context;
 import android.support.v7.widget.RecyclerView;
 import android.view.View;
-import android.webkit.WebChromeClient;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
-import android.webkit.WebViewClient;
-import android.widget.VideoView;
 
 import com.joelimyx.flipvicefeed.R;
 

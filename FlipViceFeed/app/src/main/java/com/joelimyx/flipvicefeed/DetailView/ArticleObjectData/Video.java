@@ -1,6 +1,4 @@
-package com.joelimyx.flipvicefeed.DetailView.ArticleObjectData;
-
-import android.net.Uri;
+package com.joelimyx.flipvicefeed.detailview.articleobjectdata;
 
 /**
  * Created by colinbradley on 12/3/16.

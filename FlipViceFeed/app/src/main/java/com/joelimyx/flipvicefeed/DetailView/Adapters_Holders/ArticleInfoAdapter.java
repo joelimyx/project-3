@@ -1,29 +1,20 @@
-package com.joelimyx.flipvicefeed.DetailView.Adapters_Holders;
+package com.joelimyx.flipvicefeed.detailview.adapters_holders;
 
 import android.content.Context;
-import android.graphics.Picture;
-import android.graphics.Point;
-import android.hardware.Camera;
 import android.support.v7.widget.RecyclerView;
-import android.util.DisplayMetrics;
 import android.util.Log;
-import android.view.Display;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.WindowManager;
-import android.webkit.WebSettings;
 
-import com.joelimyx.flipvicefeed.DetailView.ArticleObjectData.ArticleObject;
-import com.joelimyx.flipvicefeed.DetailView.ArticleObjectData.Image;
-import com.joelimyx.flipvicefeed.DetailView.ArticleObjectData.PhotoCredit;
-import com.joelimyx.flipvicefeed.DetailView.ArticleObjectData.Text;
-import com.joelimyx.flipvicefeed.DetailView.ArticleObjectData.Video;
-import com.joelimyx.flipvicefeed.DetailView.DetailActivity;
 import com.joelimyx.flipvicefeed.R;
-import com.joelimyx.flipvicefeed.main.main.MainActivity;
+import com.joelimyx.flipvicefeed.detailview.adapters_holders.ImageHolder;
+import com.joelimyx.flipvicefeed.detailview.articleobjectdata.ArticleObject;
+import com.joelimyx.flipvicefeed.detailview.articleobjectdata.Image;
+import com.joelimyx.flipvicefeed.detailview.articleobjectdata.PhotoCredit;
+import com.joelimyx.flipvicefeed.detailview.articleobjectdata.Text;
+import com.joelimyx.flipvicefeed.detailview.articleobjectdata.Video;
 import com.squareup.picasso.Picasso;
-import com.squareup.picasso.Transformation;
 
 import java.util.List;
 

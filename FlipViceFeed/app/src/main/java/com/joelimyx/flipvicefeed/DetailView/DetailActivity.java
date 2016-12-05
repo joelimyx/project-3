@@ -1,4 +1,4 @@
-package com.joelimyx.flipvicefeed.DetailView;
+package com.joelimyx.flipvicefeed.detailview;
 
 import android.content.Intent;
 import android.net.Uri;
@@ -9,7 +9,7 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
-import android.view.View;
+import android.view.MenuItem;
 import android.widget.ImageView;
 import android.widget.Toast;
 
@@ -17,24 +17,28 @@ import com.android.volley.Request;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
+import com.facebook.CallbackManager;
+import com.facebook.FacebookCallback;
+import com.facebook.FacebookException;
+import com.facebook.share.Sharer;
 import com.facebook.share.model.ShareLinkContent;
 import com.facebook.share.widget.ShareButton;
 import com.facebook.share.widget.ShareDialog;
 import com.google.gson.Gson;
-import com.joelimyx.flipvicefeed.DetailView.Adapters_Holders.ArticleInfoAdapter;
-import com.joelimyx.flipvicefeed.DetailView.ArticleObjectData.ArticleObject;
-import com.joelimyx.flipvicefeed.DetailView.ArticleObjectData.Image;
-import com.joelimyx.flipvicefeed.DetailView.ArticleObjectData.PhotoCredit;
-import com.joelimyx.flipvicefeed.DetailView.ArticleObjectData.Text;
-import com.joelimyx.flipvicefeed.DetailView.ArticleObjectData.Video;
-import com.joelimyx.flipvicefeed.DetailView.IndividualArticleData.Article;
-import com.joelimyx.flipvicefeed.DetailView.IndividualArticleData.ArticleData;
-import com.joelimyx.flipvicefeed.DetailView.IndividualArticleData.Example;
 import com.joelimyx.flipvicefeed.R;
-import com.squareup.picasso.Picasso;
+import com.joelimyx.flipvicefeed.classes.VolleySingleton;
+import com.joelimyx.flipvicefeed.detailview.adapters_holders.ArticleInfoAdapter;
+import com.joelimyx.flipvicefeed.detailview.articleobjectdata.ArticleObject;
+import com.joelimyx.flipvicefeed.detailview.articleobjectdata.Image;
+import com.joelimyx.flipvicefeed.detailview.articleobjectdata.PhotoCredit;
+import com.joelimyx.flipvicefeed.detailview.articleobjectdata.Text;
+import com.joelimyx.flipvicefeed.detailview.articleobjectdata.Video;
+import com.joelimyx.flipvicefeed.detailview.individualarticledata.Article;
+import com.joelimyx.flipvicefeed.detailview.individualarticledata.ArticleData;
+import com.joelimyx.flipvicefeed.detailview.individualarticledata.Example;
 import com.joelimyx.flipvicefeed.main.data.ShareGsonRootObject;
 import com.joelimyx.flipvicefeed.main.data.ShareItem;
-import com.joelimyx.flipvicefeed.classes.VolleySingleton;
+import com.squareup.picasso.Picasso;
 
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Element;
@@ -53,6 +57,8 @@ public class DetailActivity extends AppCompatActivity {
     ImageView mToolbarBackground;
     String mToolbarBackgroundImage;
     Toolbar mToolbar;
+    CallbackManager mCallbackManager;
+    ShareDialog mShareDialog;
 
     public static final String TAG = "DETAIL ACTIVITY";
 
@@ -64,6 +70,31 @@ public class DetailActivity extends AppCompatActivity {
         setSupportActionBar(mToolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setHomeButtonEnabled(true);
+
+        /*---------------------------------------------------------------------------------
+        // Facebook Callback manager to show Toast
+        ---------------------------------------------------------------------------------*/
+        mCallbackManager = CallbackManager.Factory.create();
+        mShareDialog = new ShareDialog(this);
+        mShareDialog.registerCallback(mCallbackManager, new FacebookCallback<Sharer.Result>() {
+            @Override
+            public void onSuccess(Sharer.Result result) {
+                Toast.makeText(DetailActivity.this, "Article Shared!", Toast.LENGTH_SHORT).show();
+            }
+
+            @Override
+            public void onCancel() {
+                Toast.makeText(DetailActivity.this, "Canceled", Toast.LENGTH_SHORT).show();
+            }
+
+            @Override
+            public void onError(FacebookException error) {
+                Toast.makeText(DetailActivity.this, "Error Sharing", Toast.LENGTH_SHORT).show();
+            }
+        });
+
+
+
 
         mToolbarLayout = (CollapsingToolbarLayout)findViewById(R.id.toolbar_layout);
         mToolbarBackground = (ImageView)findViewById(R.id.toolbar_image);
@@ -87,6 +118,16 @@ public class DetailActivity extends AppCompatActivity {
         mRV.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false));
         mAdapter = new ArticleInfoAdapter(mListOfObjectsInArticle, this);
         mRV.setAdapter(mAdapter);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+
+        if (item.getItemId() == android.R.id.home){
+            finish();
+            return true;
+        }
+        return false;
     }
 
     private String getArticleByID(String articleID){
@@ -242,6 +283,11 @@ public class DetailActivity extends AppCompatActivity {
             Log.d(TAG, "getDataFromHTML: LINK: " + l.attr("abs:href"));
         }
 
+
+        if (fullList.get(0).getClass() == Image.class){
+            fullList.remove(0);
+        }
+
         populateList(fullList); //CALLS populateList()
         return null;
     }
@@ -297,12 +343,11 @@ public class DetailActivity extends AppCompatActivity {
                 .build();
 
         shareButton.setShareContent(fbShare);
+    }
 
-        shareButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                ShareDialog.show(DetailActivity.this,fbShare);
-            }
-        });
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        mCallbackManager.onActivityResult(requestCode,resultCode,data);
     }
 }

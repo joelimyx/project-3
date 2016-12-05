@@ -1,18 +1,15 @@
-package com.joelimyx.flipvicefeed.DetailView.Adapters_Holders;
+package com.joelimyx.flipvicefeed.detailview.adapters_holders;
 
 import android.content.Context;
 import android.support.v7.widget.RecyclerView;
 import android.view.View;
 import android.widget.ImageView;
 
-import com.joelimyx.flipvicefeed.DetailView.ArticleObjectData.Image;
 import com.joelimyx.flipvicefeed.R;
 import com.squareup.picasso.Picasso;
 
-import java.net.URL;
-
 /**
- * Created by colinbradley on 11/30/16.
+ * Created by colinbradley on 12/5/16.
  */
 
 public class ImageHolder extends RecyclerView.ViewHolder {

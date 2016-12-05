@@ -19,9 +19,9 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:textColor="#eee"
+            android:textSize="22sp"
             android:fontFamily="sans-serif-condensed"
             android:layout_marginLeft="8dp"
-            android:layout_marginRight="8dp"
-            android:textSize="22sp"/>
+            android:layout_marginRight="8dp"/>
     </FrameLayout>
 </android.support.v7.widget.CardView>

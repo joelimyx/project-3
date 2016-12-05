@@ -1,4 +1,4 @@
-package com.joelimyx.flipvicefeed.DetailView.IndividualArticleData;
+package com.joelimyx.flipvicefeed.detailview.individualarticledata;
 
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;

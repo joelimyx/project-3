@@ -19,7 +19,7 @@ import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
 import com.google.gson.Gson;
-import com.joelimyx.flipvicefeed.DetailView.DetailActivity;
+import com.joelimyx.flipvicefeed.detailview.DetailActivity;
 import com.joelimyx.flipvicefeed.R;
 import com.joelimyx.flipvicefeed.classes.GsonArticle;
 import com.joelimyx.flipvicefeed.classes.Item;
@@ -55,7 +55,7 @@ public class MainAdapter extends RecyclerView.Adapter<MainAdapter.MainViewHolder
     }
 
     @Override
-    public void onBindViewHolder(final MainViewHolder holder, final int position) {
+    public void onBindViewHolder(MainViewHolder holder, final int position) {
 
         holder.mTitleText.setText(mArticleList.get(position).getTitle());
         Picasso.with(mContext).setLoggingEnabled(true);
@@ -68,8 +68,6 @@ public class MainAdapter extends RecyclerView.Adapter<MainAdapter.MainViewHolder
             @Override
             public void onClick(View view) {
                 mListener.onItemSelected(mArticleList.get(position).getId());
-                String id = mArticleList.get(position).getId().toString();
-
             }
         });
     }
@@ -106,10 +104,18 @@ public class MainAdapter extends RecyclerView.Adapter<MainAdapter.MainViewHolder
         VolleySingleton.getInstance(mContext).addToRequestQueue(request);
     }
 
+    public void addData(List<Item> addedItems){
+        int start = getItemCount();
+        mArticleList.addAll(addedItems);
+        notifyItemRangeInserted(start,addedItems.size());
+    }
+
+
     class MainViewHolder extends RecyclerView.ViewHolder{
         private TextView mTitleText;
         private ImageView mArticleImage;
         private FrameLayout mArticleItemLayout;
+
         public MainViewHolder(View itemView) {
             super(itemView);
             mTitleText = (TextView) itemView.findViewById(R.id.article_item_title);

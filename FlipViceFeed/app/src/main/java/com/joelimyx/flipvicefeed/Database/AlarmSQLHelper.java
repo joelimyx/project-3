@@ -20,7 +20,7 @@ import java.util.List;
 public class AlarmSQLHelper extends SQLiteOpenHelper {
     private static final String TAG = AlarmSQLHelper.class.getCanonicalName();
 
-    private static final int DATABASE_VERSION = 2;
+    private static final int DATABASE_VERSION = 3;
     public static final String DATABASE_NAME = "notifications.db";
 
     public static final String ALARMS_TABLE = "ALARMS_TABLE";
@@ -93,8 +93,7 @@ public class AlarmSQLHelper extends SQLiteOpenHelper {
                 null);
         List<TopicObject> topicList = new ArrayList<>();
         if (cursor.moveToFirst()){
-            if (!cursor.isAfterLast()){
-                Log.d(TAG, "getAllTopic: "+cursor.getString(cursor.getColumnIndex(COL_TOPIC_NAME)));
+            while (!cursor.isAfterLast()){
                 topicList.add(new TopicObject(
                         cursor.getString(cursor.getColumnIndex(COL_TOPIC_NAME)),
                         cursor.getInt(cursor.getColumnIndex(COL_TOPIC_SELECTED))
@@ -102,7 +101,32 @@ public class AlarmSQLHelper extends SQLiteOpenHelper {
                 cursor.moveToNext();
             }
         }
+        cursor.close();
         return topicList;
+    }
+
+    public List<TopicObject> getFavoriteTopics(){
+        SQLiteDatabase db = getReadableDatabase();
+        Cursor cursor = db.query(
+                TOPIC_FILTER_TABLE,
+                TOPIC_COLUMNS,
+                null,null,null,null,null,null);
+        List<TopicObject> favoriteTopicList = new ArrayList<>();
+        if(cursor.moveToFirst()){
+            while(!cursor.isAfterLast()){
+                int isFavorite = cursor.getInt(cursor.getColumnIndex(COL_TOPIC_SELECTED));
+
+                if(isFavorite == 1) {
+                    favoriteTopicList.add(new TopicObject(
+                            cursor.getString(cursor.getColumnIndex(COL_TOPIC_NAME)),
+                            cursor.getInt(cursor.getColumnIndex(COL_TOPIC_SELECTED))
+                    ));
+                }
+                cursor.moveToNext();
+            }
+        }
+        cursor.close();
+        return favoriteTopicList;
     }
 
     public void updateSelectedTopic(String topic, boolean changedState){
