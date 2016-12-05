@@ -63,7 +63,6 @@ public class MainActivity extends AppCompatActivity
     private DrawerLayout mDrawerLayout;
     private boolean mTwoPane;
     private VolleySingleton mVolleySingleton;
-    private NetworkStateReceiver mNetworkStateReceiver;
     private static Snackbar mSnackbar;
 
     private SwipeRefreshLayout mSwipeRefreshLayout;
