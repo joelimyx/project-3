@@ -1,22 +1,17 @@
 package com.joelimyx.flipvicefeed.main.main;
 
-import android.app.Activity;
 import android.app.ActivityOptions;
 import android.content.Intent;
-import android.app.SearchManager;
 import android.content.BroadcastReceiver;
 import android.content.Context;
-import android.content.Intent;
-import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.AsyncTask;
-import android.os.Build;
 import android.support.annotation.NonNull;
 import android.support.design.widget.NavigationView;
 import android.support.design.widget.Snackbar;
-import android.support.v4.util.Pair;
+import android.support.transition.TransitionSet;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v4.widget.SwipeRefreshLayout;
@@ -26,10 +21,16 @@ import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
-import android.util.Log;
+import android.transition.ChangeClipBounds;
+import android.transition.ChangeImageTransform;
+import android.transition.ChangeTransform;
+import android.transition.Explode;
+import android.transition.Fade;
+import android.util.Pair;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
+import android.view.View;
 import android.widget.Toast;
 
 import com.android.volley.Request;
@@ -51,6 +52,7 @@ import com.joelimyx.flipvicefeed.setting.TopicFilterFragment;
 import com.joelimyx.flipvicefeed.splashscreen.WelcomeActivity;
 
 import java.util.ArrayList;
+import java.util.IllegalFormatCodePointException;
 import java.util.List;
 
 public class MainActivity extends AppCompatActivity
@@ -65,6 +67,7 @@ public class MainActivity extends AppCompatActivity
     private boolean mTwoPane;
     private VolleySingleton mVolleySingleton;
     private static Snackbar mSnackbar;
+    private ActivityOptions mActivityOptions;
 
     private SwipeRefreshLayout mSwipeRefreshLayout;
     private EndlessRecyclerViewScrollListener mScrollListener;
@@ -87,6 +90,23 @@ public class MainActivity extends AppCompatActivity
 
         getSharedPreferences("PREFERENCE", MODE_PRIVATE).edit()
                 .putBoolean(SPLASH_BOOLEAN, false).commit();
+
+        /*---------------------------------------------------------------------------------
+        // ANIMATION
+        ---------------------------------------------------------------------------------*/
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.LOLLIPOP){
+            //Activity Transition
+            android.transition.TransitionSet activityTransition = new android.transition.TransitionSet();
+            activityTransition.addTransition(new Fade());
+            getWindow().setEnterTransition(activityTransition);
+            getWindow().setExitTransition(activityTransition);
+
+            //Shared Element
+            android.transition.TransitionSet sharedElementTransition = new android.transition.TransitionSet();
+            sharedElementTransition.addTransition(new ChangeImageTransform());
+            getWindow().setSharedElementEnterTransition(sharedElementTransition);
+            getWindow().setSharedElementReturnTransition(sharedElementTransition);
+        }
 
         //Reference
         mTwoPane = findViewById(R.id.fragment_container)!=null;
@@ -159,12 +179,19 @@ public class MainActivity extends AppCompatActivity
         }
     }
 
+    /*---------------------------------------------------------------------------------
+    // Interface from main Adapter
+    ---------------------------------------------------------------------------------*/
     @Override
-    public void onItemSelected(int id) {
+    public void onItemSelected(int id, View view) {
         //// TODO: 11/30/16 start detail activity if not in tablet else start detail fragment
         Intent intent = new Intent(this, DetailActivity.class);
         intent.putExtra("id", id);
-        startActivity(intent);
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.LOLLIPOP) {
+            Pair<View, String> mainPair = Pair.create(view.findViewById(R.id.article_item_image), getString(R.string.main_to_detail));
+            mActivityOptions = ActivityOptions.makeSceneTransitionAnimation(MainActivity.this, mainPair);
+        }
+        startActivity(intent, mActivityOptions.toBundle());
     }
 
     /*---------------------------------------------------------------------------------
@@ -186,7 +213,7 @@ public class MainActivity extends AppCompatActivity
 
             //Else grab the news according to the topic selected
             default:
-                mAdapter.swapdata((String) item.getTitle());
+                mAdapter.swapData((String) item.getTitle());
                 mScrollListener.resetState();
                 mDrawerLayout.closeDrawer(GravityCompat.START);
                 mMainRecyclerView.scrollToPosition(0);
@@ -223,7 +250,6 @@ public class MainActivity extends AppCompatActivity
                                 .replace(R.id.fragment_container,new TopicFilterFragment())
                                 .commit();
                     }else{
-
                         getSupportFragmentManager()
                                 .beginTransaction()
                                 .replace(R.id.fragment_container,new NotificationFragment())
@@ -233,6 +259,7 @@ public class MainActivity extends AppCompatActivity
                     Intent intent = new Intent(this, SettingActivity.class);
                     intent.putExtra("setting", item.getTitle());
                     startActivity(intent);
+                    overridePendingTransition(R.anim.checkout_scale_in,R.anim.no_animation);
                 }
                 return true;
             case R.id.search:
@@ -254,7 +281,7 @@ public class MainActivity extends AppCompatActivity
             if(currentFilter.equals("latest")) {
                 getLatestNews(0);
             }else{
-                mAdapter.swapdata(currentFilter);
+                mAdapter.swapData(currentFilter);
                 mScrollListener.resetState();
             }
         }
