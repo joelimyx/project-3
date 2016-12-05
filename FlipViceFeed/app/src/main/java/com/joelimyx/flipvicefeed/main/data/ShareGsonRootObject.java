@@ -8,14 +8,14 @@ public class ShareGsonRootObject {
 
     @SerializedName("data")
     @Expose
-    private FacebookShareData data;
+    private ShareData data;
 
     /**
      *
      * @return
      *     The data
      */
-    public FacebookShareData getData() {
+    public ShareData getData() {
         return data;
     }
 
@@ -24,7 +24,7 @@ public class ShareGsonRootObject {
      * @param data
      *     The data
      */
-    public void setData(FacebookShareData data) {
+    public void setData(ShareData data) {
         this.data = data;
     }
 
