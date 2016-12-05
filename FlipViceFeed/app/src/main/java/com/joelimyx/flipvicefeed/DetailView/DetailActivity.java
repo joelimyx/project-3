@@ -4,24 +4,19 @@ import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.design.widget.CollapsingToolbarLayout;
-import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.MenuItem;
-import android.view.View;
 import android.widget.ImageView;
 import android.widget.Toast;
 
 import com.android.volley.Request;
-import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
-import com.android.volley.toolbox.Volley;
 import com.facebook.CallbackManager;
 import com.facebook.FacebookCallback;
 import com.facebook.FacebookException;
@@ -30,25 +25,24 @@ import com.facebook.share.model.ShareLinkContent;
 import com.facebook.share.widget.ShareButton;
 import com.facebook.share.widget.ShareDialog;
 import com.google.gson.Gson;
+import com.joelimyx.flipvicefeed.R;
+import com.joelimyx.flipvicefeed.classes.VolleySingleton;
 import com.joelimyx.flipvicefeed.detailview.adapters_holders.ArticleInfoAdapter;
 import com.joelimyx.flipvicefeed.detailview.articleobjectdata.ArticleObject;
 import com.joelimyx.flipvicefeed.detailview.articleobjectdata.Image;
+import com.joelimyx.flipvicefeed.detailview.articleobjectdata.PhotoCredit;
 import com.joelimyx.flipvicefeed.detailview.articleobjectdata.Text;
+import com.joelimyx.flipvicefeed.detailview.articleobjectdata.Video;
 import com.joelimyx.flipvicefeed.detailview.individualarticledata.Article;
 import com.joelimyx.flipvicefeed.detailview.individualarticledata.ArticleData;
 import com.joelimyx.flipvicefeed.detailview.individualarticledata.Example;
-import com.joelimyx.flipvicefeed.R;
-import com.squareup.picasso.Picasso;
 import com.joelimyx.flipvicefeed.main.data.ShareGsonRootObject;
 import com.joelimyx.flipvicefeed.main.data.ShareItem;
-import com.joelimyx.flipvicefeed.classes.VolleySingleton;
+import com.squareup.picasso.Picasso;
 
 import org.jsoup.Jsoup;
-import org.jsoup.safety.Cleaner;
-import org.jsoup.safety.Whitelist;
+import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -61,6 +55,8 @@ public class DetailActivity extends AppCompatActivity {
     List<ArticleObject> mListOfObjectsInArticle;
     CollapsingToolbarLayout mToolbarLayout;
     ImageView mToolbarBackground;
+    String mToolbarBackgroundImage;
+    Toolbar mToolbar;
     CallbackManager mCallbackManager;
     ShareDialog mShareDialog;
 
@@ -70,6 +66,10 @@ public class DetailActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_detail);
+        mToolbar = (Toolbar) findViewById(R.id.toolbar);
+        setSupportActionBar(mToolbar);
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        getSupportActionBar().setHomeButtonEnabled(true);
 
         /*---------------------------------------------------------------------------------
         // Facebook Callback manager to show Toast
@@ -93,10 +93,8 @@ public class DetailActivity extends AppCompatActivity {
             }
         });
 
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
-        setSupportActionBar(toolbar);
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-        getSupportActionBar().setHomeButtonEnabled(true);
+
+
 
         mToolbarLayout = (CollapsingToolbarLayout)findViewById(R.id.toolbar_layout);
         mToolbarBackground = (ImageView)findViewById(R.id.toolbar_image);
@@ -110,6 +108,7 @@ public class DetailActivity extends AppCompatActivity {
         //FACEBOOK SHARING
         getDataForShare(id);
 
+
         mListOfObjectsInArticle = new ArrayList<>();
         //STARTS VOLLEY API SEARCH FOR INDIVIDUAL ARTICLE
         getArticleByID(idAsString);
@@ -119,6 +118,16 @@ public class DetailActivity extends AppCompatActivity {
         mRV.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false));
         mAdapter = new ArticleInfoAdapter(mListOfObjectsInArticle, this);
         mRV.setAdapter(mAdapter);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+
+        if (item.getItemId() == android.R.id.home){
+            finish();
+            return true;
+        }
+        return false;
     }
 
     private String getArticleByID(String articleID){
@@ -150,9 +159,9 @@ public class DetailActivity extends AppCompatActivity {
 
                 String imgURL = article.getThumb();
                 Log.d(TAG, "onResponse: THUMBNAIL pulled from ARTICLE: " + imgURL);
+                mToolbarBackgroundImage = imgURL;
 
-                setTitle(title,imgURL); //SENDS TITLE AND IMAGE TO THE TOOLBAR
-
+                setTitle(title,mToolbarBackgroundImage); //SENDS TITLE AND IMAGE TO THE TOOLBAR
 
                 //SEND TO getDataFromHTML() TO PARSE HTML
                 getDataFromHTML(body);
@@ -172,6 +181,7 @@ public class DetailActivity extends AppCompatActivity {
     private String getDataFromHTML(String html){
         //CREATE JSOUP DOCUMENT FROM THE HTML
         org.jsoup.nodes.Document doc = Jsoup.parse(html);
+
         //GETS LIST OF  <p> ELEMENTS FROM DOCUMENT
         Elements textFromHTML = doc.select("p");
 
@@ -179,39 +189,93 @@ public class DetailActivity extends AppCompatActivity {
         //***VERY ANNOYING PLEASE DON'T TOUCH THIS BLOCK :) *******
         //for() LOOP GOES THROUGH THE LIST OF ELEMENTS AND CHECKS EACH ELEMENT
         for (org.jsoup.nodes.Element e: textFromHTML){
-            if (!e.text().equals("")) {  //FINDS ELEMENTS WITH READABLE TEXT ON SCREEN
+            if (!e.text().equals("")) {//FINDS ELEMENTS WITH READABLE TEXT ON SCREEN
+                if (!e.html().contains("<img src=")) {
+                    if (e.hasClass("photo-credit")){  //CHECKS TO SEE IF THE TEXT IS A PHOTO CREDIT CLASS AND SEPARATES
+                        String photoCredit = e.text();
+                        PhotoCredit credit = new PhotoCredit(photoCredit);
+                        fullList.add(credit);
+                    }else {
 
-                Text text = new Text(e.text());  //CREATES NEW Text OBJECT
+                        Text text = new Text(e.text());  //CREATES NEW Text OBJECT
 
-                fullList.add(text);   //ADDS TO LIST
+                        fullList.add(text);   //ADDS TO LIST
+                    }
+                }else {  //IF HTML HAS BOTH IMAGE AND PHOTO CREDIT TEXT IT LOCATES AND SEPARATES
+                    String imgSrc = e.html();
+                    int indexStart = imgSrc.indexOf("http");
+                    int indexEnd = imgSrc.indexOf("\" ");
+                    String imgLink = imgSrc.substring(indexStart,indexEnd);
+
+                    Image image = new Image(imgLink);
+                    fullList.add(image);
+
+                    String photoCredit = e.text();
+                    PhotoCredit credit = new PhotoCredit(photoCredit);
+                    fullList.add(credit);
+                }
 
                 //CHECKS FOR EMPTY .text(), AND A POPULATED .html() WHICH SHOWS OTHER CONTENT(IMGS,VIDEOS) ON SCREEN
                 //ALSO CHECKS IF THIS IMAGE WILL BE FIRST INTO fullList
                 //IGNORES IF LIST IS EMPTY B/C THE TOP OF DETAIL PAGE GETS THIS IMAGE SO WE CAN AVOID DOUBLE IMAGES AT THE TOP OF THE PAGE
-            }else if (e.text().equals("") && !e.html().equals("") && !fullList.isEmpty()){
+            }else if (e.text().equals("") && !e.html().equals("") && !e.html().equals(mToolbarBackgroundImage)) {
 
                 //CHECKS TO SEE IF THERE ARE NO <iframe> OBJECTS IN THE HTML
                 if (!e.html().contains("<iframe") && !e.html().contains("<br>")) {
 
-                    String photoLink = e.html();
-                    int indexStart = photoLink.indexOf("http");//GETS THE START AND END INDEX OF THE IMAGE LINK
-                    int indexEnd = photoLink.indexOf("\" ");
+                    if (e.html().contains("<a href")){
+                        String ahref = e.html();
+                        int indexStart = ahref.indexOf("http");
+                        int indexEnd = ahref.indexOf("\"><");
+                        String ahrefLink = ahref.substring(indexStart,indexEnd);
+                        Log.d(TAG, "getDataFromHTML: A HREF HTML--- " + ahref);
 
-                    //PARSES FULL .html() TO JUST THE LINK NEEDED
-                    String photoHTML = photoLink.substring(indexStart, indexEnd);
+                        Image image  = new Image(ahrefLink);
+                        fullList.add(image);
+                    }else if (!e.html().contains("<p href")){
 
-                    Image image = new Image(photoHTML);//CREATES NEW Image OBJECT
+                        String photoHTML = null;
+                        String photoLink = e.html();
+                        int indexStart = photoLink.indexOf("http");//GETS THE START AND END INDEX OF THE IMAGE LINK
+                        int indexEnd1 = photoLink.indexOf("\" ");
+                        photoHTML = photoLink.substring(indexStart, indexEnd1);
 
-                    fullList.add(image);//ADDS TO LIST
+                        //PARSES FULL .html() TO JUST THE LINK NEEDED
 
-                    Log.d(TAG, "getDataFromHTML: IMAGE HTML: " + photoHTML);
-                    Log.d(TAG, "getDataFromHTML: INDEX OF http: " + indexStart);
-                    Log.d(TAG, "getDataFromHTML: INDEX OF \" : " + indexEnd);
-                }       //SERIES OF CHECKS TO ENSURE ACCURACY OF PARSER
+                        Image image = new Image(photoHTML);//CREATES NEW Image OBJECT
+
+                        fullList.add(image);//ADDS TO LIST
+
+                        Log.d(TAG, "getDataFromHTML: IMAGE HTML: " + photoHTML);
+                        Log.d(TAG, "getDataFromHTML: INDEX OF http: " + indexStart);
+                        Log.d(TAG, "getDataFromHTML: INDEX OF \" : " );
+                        //SERIES OF CHECKS TO ENSURE ACCURACY OF PARSER
+                    }
+                }
             }
             Log.d(TAG, "getDataFromHTML: TEXT: " + e.text());
             Log.d(TAG, "getDataFromHTML: HTML: " + e.html());
         }
+
+        Elements iframeList = doc.select("div");    //LOCATES AND EXTRACTS VIDEO LINKS AND OTHER IFRAME LINKS
+        List<ArticleObject> iFrameList = new ArrayList<>();
+        for (Element e: iframeList){
+            Log.d(TAG, "getDataFromHTML: ****iframeHTML***  " + e.html());
+            String iframeHTML = e.html();
+            int indexStart = iframeHTML.indexOf("http");
+            int indexEnd = iframeHTML.indexOf("\" ");
+            String iframeLink = iframeHTML.substring(indexStart,indexEnd);
+
+            Log.d(TAG, "getDataFromHTML: ***iframeStartIndex***  " + indexStart);
+            Log.d(TAG, "getDataFromHTML: ***iframeEndIndex***  " + indexEnd);
+            Log.d(TAG, "getDataFromHTML: ***iframeLINK***  " + iframeLink);
+
+            Video video = new Video(iframeHTML);
+
+            fullList.add(video);
+        }
+
+
 
         //TESTING THIS BLOCK OF TO GET OTHER HYPERLINKS IF WE DECIDE TO USE THEM
         Elements links = doc.select("a[href]");
@@ -219,9 +283,15 @@ public class DetailActivity extends AppCompatActivity {
             Log.d(TAG, "getDataFromHTML: LINK: " + l.attr("abs:href"));
         }
 
+
+        if (fullList.get(0).getClass() == Image.class){
+            fullList.remove(0);
+        }
+
         populateList(fullList); //CALLS populateList()
         return null;
     }
+
 
     //SETS TITLE AND IMAGE TO THE TOOLBAR
     public void setTitle(String title, String imgURL){
