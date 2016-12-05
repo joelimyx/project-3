@@ -12,10 +12,13 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
+import android.webkit.WebSettings;
 
 import com.joelimyx.flipvicefeed.DetailView.ArticleObjectData.ArticleObject;
 import com.joelimyx.flipvicefeed.DetailView.ArticleObjectData.Image;
+import com.joelimyx.flipvicefeed.DetailView.ArticleObjectData.PhotoCredit;
 import com.joelimyx.flipvicefeed.DetailView.ArticleObjectData.Text;
+import com.joelimyx.flipvicefeed.DetailView.ArticleObjectData.Video;
 import com.joelimyx.flipvicefeed.DetailView.DetailActivity;
 import com.joelimyx.flipvicefeed.R;
 import com.joelimyx.flipvicefeed.main.main.MainActivity;
@@ -37,6 +40,8 @@ public class ArticleInfoAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
 
     public static final int IMAGE = 0;
     public static final int TEXT = 1;
+    public static final int VIDEO = 2;
+    public static final int PHOTO_CREDIT = 3;
 
     public ArticleInfoAdapter(List<ArticleObject> mObjectList, Context context) {
         mListOfObjects = mObjectList;
@@ -50,7 +55,10 @@ public class ArticleInfoAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
             return IMAGE;
         }else if (mListOfObjects.get(position) instanceof Text){
             return TEXT;
-        }
+        }else if (mListOfObjects.get(position) instanceof Video){
+            return VIDEO;
+        }else if (mListOfObjects.get(position) instanceof PhotoCredit)
+            return PHOTO_CREDIT;
         return -1;
     }
 
@@ -71,6 +79,16 @@ public class ArticleInfoAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
                 viewHolder = new TextHolder(textView);
                 Log.d(TAG, "onCreateViewHolder: text");
                 return viewHolder;
+            case VIDEO:
+                View videoView = inflater.inflate(R.layout.detail_item_video, parent, false);
+                viewHolder = new VideoHolder(videoView);
+                Log.d(TAG, "onCreateViewHolder: video");
+                return viewHolder;
+            case PHOTO_CREDIT:
+                View photocreditHolder = inflater.inflate(R.layout.detail_item_photocredit_layout, parent, false);
+                viewHolder = new PhotoCreditHolder(photocreditHolder);
+                Log.d(TAG, "onCreateViewHolder: photo credit");
+                return viewHolder;
             default:
                 View view = inflater.inflate(R.layout.detail_item_image_layout, parent, false);
                 viewHolder = new ImageHolder(view);
@@ -90,6 +108,14 @@ public class ArticleInfoAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
             case TEXT:
                 TextHolder textHolder = (TextHolder) holder;
                 configureTextViewHolder(textHolder, position);
+                break;
+            case VIDEO:
+                VideoHolder videoHolder = (VideoHolder) holder;
+                configureVideoViewHolder(videoHolder, position);
+                break;
+            case PHOTO_CREDIT:
+                PhotoCreditHolder photocreditHolder = (PhotoCreditHolder)  holder;
+                configurePhotoCreditViewHolder(photocreditHolder,position);
                 break;
         }
     }
@@ -115,6 +141,20 @@ public class ArticleInfoAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
         Text text = (Text) mListOfObjects.get(position);
         if (text != null){
             holder.bindDataToViews(text);
+        }
+    }
+
+    private void configureVideoViewHolder(VideoHolder holder, int position){
+        Video video = (Video) mListOfObjects.get(position);
+        if (video != null){
+            holder.bindDataToViews(video.getVideoLink(), mContext);
+        }
+    }
+
+    private void configurePhotoCreditViewHolder(PhotoCreditHolder holder, int position){
+        PhotoCredit credit = (PhotoCredit) mListOfObjects.get(position);
+        if (credit != null){
+            holder.bindDataToView(credit);
         }
     }
 
