@@ -93,8 +93,7 @@ public class AlarmSQLHelper extends SQLiteOpenHelper {
                 null);
         List<TopicObject> topicList = new ArrayList<>();
         if (cursor.moveToFirst()){
-            if (!cursor.isAfterLast()){
-                Log.d(TAG, "getAllTopic: "+cursor.getString(cursor.getColumnIndex(COL_TOPIC_NAME)));
+            while (!cursor.isAfterLast()){
                 topicList.add(new TopicObject(
                         cursor.getString(cursor.getColumnIndex(COL_TOPIC_NAME)),
                         cursor.getInt(cursor.getColumnIndex(COL_TOPIC_SELECTED))
