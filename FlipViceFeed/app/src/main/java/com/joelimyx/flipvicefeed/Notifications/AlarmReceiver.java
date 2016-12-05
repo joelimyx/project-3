@@ -3,6 +3,7 @@ package com.joelimyx.flipvicefeed.notifications;
 
 import android.app.Notification;
 import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.app.job.JobInfo;
 import android.app.job.JobScheduler;
 import android.content.BroadcastReceiver;
@@ -15,6 +16,7 @@ import android.support.v7.app.NotificationCompat;
 import android.widget.RemoteViews;
 
 import com.joelimyx.flipvicefeed.R;
+import com.joelimyx.flipvicefeed.main.main.MainActivity;
 
 /**
  * Created by KorbBookProReturns on 11/30/16.
@@ -25,7 +27,6 @@ public class AlarmReceiver extends BroadcastReceiver {
     public static final String PACKAGE_NAME = "com.joelimyx.flipvicefeed";
     public static final String NEW_STORIES_DEFAULT = "Check out the latest stories!";
     public static final String SEE_NEW_STORIES = "New stories in: ";
-    Notification mNotification;
 
     @Override
     public void onReceive(Context context, Intent intent) {
@@ -65,10 +66,14 @@ public class AlarmReceiver extends BroadcastReceiver {
 
             NotificationCompat.Builder mBuilder = new NotificationCompat.Builder(context);
 
+            Intent defaultIntent = new Intent(context, MainActivity.class);
+            PendingIntent pendingIntent = PendingIntent.getActivity(context,0,intent,0);
+
             Notification notification = mBuilder.setSmallIcon(R.drawable.ic_vooz)
                     .setContentTitle(NEW_STORIES_DEFAULT)
                     .setContent(customNotificationView)
                     .setAutoCancel(true)
+                    .setContentIntent(pendingIntent)
                     .build();
 
             NotificationManager notificationMan = (NotificationManager) context.getSystemService(context.NOTIFICATION_SERVICE);
