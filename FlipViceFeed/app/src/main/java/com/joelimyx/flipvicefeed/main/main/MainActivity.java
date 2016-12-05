@@ -56,8 +56,8 @@ public class MainActivity extends AppCompatActivity
         implements MainAdapter.OnItemSelectedListener,
         NavigationView.OnNavigationItemSelectedListener,
         SwipeRefreshLayout.OnRefreshListener{
-    ActionBarDrawerToggle mToggle;
 
+    private ActionBarDrawerToggle mToggle;
     private RecyclerView mMainRecyclerView;
     private MainAdapter mAdapter;
     private DrawerLayout mDrawerLayout;
@@ -309,7 +309,7 @@ public class MainActivity extends AppCompatActivity
                         Toast.makeText(getApplicationContext(), "Error getting articles", Toast.LENGTH_SHORT).show();
                     }
                 });
-        VolleySingleton.getInstance(this).addToRequestQueue(request);
+        mVolleySingleton.addToRequestQueue(request);
 
     }
 
