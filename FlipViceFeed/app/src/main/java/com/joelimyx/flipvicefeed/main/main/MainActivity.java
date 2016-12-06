@@ -27,6 +27,7 @@ import android.transition.ChangeImageTransform;
 import android.transition.ChangeTransform;
 import android.transition.Explode;
 import android.transition.Fade;
+import android.util.Log;
 import android.util.Pair;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -55,8 +56,11 @@ import com.joelimyx.flipvicefeed.setting.TopicFilterFragment;
 import com.joelimyx.flipvicefeed.splashscreen.WelcomeActivity;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.IllegalFormatCodePointException;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 
 public class MainActivity extends AppCompatActivity
         implements MainAdapter.OnItemSelectedListener,
@@ -138,7 +142,7 @@ public class MainActivity extends AppCompatActivity
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         getSupportActionBar().setDefaultDisplayHomeAsUpEnabled(true);
-        getSupportActionBar().setTitle("Latest");
+
 
         //RecyclerView
         mMainRecyclerView = (RecyclerView) findViewById(R.id.main_recyclerview);
@@ -182,7 +186,13 @@ public class MainActivity extends AppCompatActivity
         ConnectivityManager manager = (ConnectivityManager) getSystemService(CONNECTIVITY_SERVICE);
         NetworkInfo networkInfo = manager.getActiveNetworkInfo();
         if (networkInfo != null && networkInfo.isConnected()) {
-            getLatestNews(0);
+            if (AlarmSQLHelper.getInstance(this).getFavoriteTopics().size()==0) {
+                getLatestNews(0);
+                getSupportActionBar().setTitle("Latest");
+            }else {
+                getMyFeed(0);
+                getSupportActionBar().setTitle("My Feed");
+            }
         } else {
             mSnackbar.show();
         }
@@ -200,6 +210,7 @@ public class MainActivity extends AppCompatActivity
     ---------------------------------------------------------------------------------*/
     @Override
     public void onItemSelected(int id, View view) {
+        // TODO: 12/6/16 Fragment detail add to back stack
         Intent intent = new Intent(this, DetailActivity.class);
         intent.putExtra("id", id);
         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.LOLLIPOP) {
@@ -226,6 +237,14 @@ public class MainActivity extends AppCompatActivity
                 mDrawerLayout.closeDrawer(GravityCompat.START);
                 getSupportActionBar().setTitle("Latest");
                 sharedPreferences.edit().putString(getString(R.string.current_filter),"latest").commit();
+                mSwipeRefreshLayout.setRefreshing(false);
+                return true;
+            //Grab the latest news
+            case R.id.myfeed:
+                getMyFeed(0);
+                mDrawerLayout.closeDrawer(GravityCompat.START);
+                getSupportActionBar().setTitle("My Feed");
+                sharedPreferences.edit().putString(getString(R.string.current_filter),"my feed").commit();
                 mSwipeRefreshLayout.setRefreshing(false);
                 return true;
 
@@ -316,7 +335,10 @@ public class MainActivity extends AppCompatActivity
         if (currentFilter!=null){
             if(currentFilter.equals("latest")) {
                 getLatestNews(0);
-            }else{
+            }else if(currentFilter.equals("my feed")){
+                getMyFeed(0);
+            }
+            else{
                 mAdapter.swapData(currentFilter);
                 mScrollListener.resetState();
             }
@@ -375,7 +397,11 @@ public class MainActivity extends AppCompatActivity
         if (currentFilter!=null){
             if(currentFilter.equals("latest")) {
                 url+=page;
-            }else{
+            }else if(currentFilter.equals("my feed")){
+                addMyFeed(page);
+                return;
+            }
+            else{
                 url+="category/"+currentFilter+"/"+page;
             }
         }
@@ -400,13 +426,135 @@ public class MainActivity extends AppCompatActivity
                 });
         mVolleySingleton.addToRequestQueue(request);
     }
+
+    /**
+     * Get the latest feed according to your topic list in favorite
+     * @param page next page to load
+     */
+    public void getMyFeed(int page){
+        final List<TopicObject> favoriteTopics = AlarmSQLHelper.getInstance(this).getFavoriteTopics();
+        final Map<String, List<Item>> myFeedMap = new HashMap<>();
+        final List<Item> myFeedArticles = new LinkedList<>();
+        int articlesPerTopic = 1;
+        SharedPreferences sharedPreferences = getSharedPreferences(getString(R.string.preference_current_filter),MODE_PRIVATE);
+        sharedPreferences.edit().putString(getString(R.string.current_filter),"my feed").commit();
+
+        if (favoriteTopics.size() <= 3){
+            articlesPerTopic = 6;
+        }else if(favoriteTopics.size() <=7){
+            articlesPerTopic = 3;
+        }else if (favoriteTopics.size() >7){
+            articlesPerTopic++;
+        }
+
+        //Make as many api call as there are for favorite topic
+        for (int j = 0; j < favoriteTopics.size(); j++) {
+            final String topic = favoriteTopics.get(j).getTopic();
+            String url = "http://vice.com/api/getlatest/category/"+ topic + "/" + page;
+            final int finalArticlesPerTopic = articlesPerTopic;
+            StringRequest request = new StringRequest(Request.Method.GET, url,
+                    new Response.Listener<String>() {
+                        @Override
+                        public void onResponse(String response) {
+
+                            //Extracting data
+                            GsonArticle gsonArticle = new Gson().fromJson(response,GsonArticle.class);
+                            List<Item> items = gsonArticle.getData().getItems();
+
+                            myFeedMap.put(topic,items);
+                            if (myFeedMap.size()==favoriteTopics.size()){
+
+                                //Append articles to my feed
+                                for (int i = 0; i < finalArticlesPerTopic; i++) {
+                                    for (TopicObject topic : favoriteTopics) {
+                                        Log.d(TAG, "onResponse: "+topic.getTopic()+" map size: "+myFeedMap.size());
+                                        myFeedArticles
+                                                .add(myFeedMap.get(
+                                                        topic.getTopic()).get(i));
+                                    }
+                                }
+                                mAdapter = new MainAdapter(myFeedArticles,MainActivity.this,MainActivity.this);
+                                mMainRecyclerView.setAdapter(mAdapter);
+                                mSwipeRefreshLayout.setRefreshing(false);
+                            }
+                        }
+                    },
+                    new Response.ErrorListener() {
+                        @Override
+                        public void onErrorResponse(VolleyError error) {
+                            Toast.makeText(getApplicationContext(), "Error getting articles", Toast.LENGTH_SHORT).show();
+                        }
+                    });
+            mVolleySingleton.addToRequestQueue(request);
+        }
+    }
+
+    /**
+     * Helper method for endless scroll
+     * @param page next page to load
+     */
+    public void addMyFeed(int page){
+        final List<TopicObject> favoriteTopics = AlarmSQLHelper.getInstance(this).getFavoriteTopics();
+        final Map<String, List<Item>> myFeedMap = new HashMap<>();
+        final List<Item> myFeedArticles = new LinkedList<>();
+        int articlesPerTopic = 1;
+
+        if (favoriteTopics.size() <= 3){
+            articlesPerTopic = 6;
+        }else if(favoriteTopics.size() <=7){
+            articlesPerTopic = 3;
+        }else if (favoriteTopics.size() >7){
+            articlesPerTopic++;
+        }
+
+        //Make as many api call as there are for favorite topic
+        for (int j = 0; j < favoriteTopics.size(); j++) {
+            final String topic = favoriteTopics.get(j).getTopic();
+            String url = "http://vice.com/api/getlatest/category/"+ topic + "/" + page;
+            final int finalArticlesPerTopic = articlesPerTopic;
+            StringRequest request = new StringRequest(Request.Method.GET, url,
+                    new Response.Listener<String>() {
+                        @Override
+                        public void onResponse(String response) {
+
+                            //Extracting data
+                            GsonArticle gsonArticle = new Gson().fromJson(response,GsonArticle.class);
+                            List<Item> items = gsonArticle.getData().getItems();
+
+                            myFeedMap.put(topic,items);
+                            if (myFeedMap.size()==favoriteTopics.size()){
+
+                                //Append articles to my feed
+                                for (int i = 0; i < finalArticlesPerTopic; i++) {
+                                    for (TopicObject topic : favoriteTopics) {
+                                        Log.d(TAG, "onResponse: "+topic.getTopic()+" map size: "+myFeedMap.size());
+                                        myFeedArticles
+                                                .add(myFeedMap.get(
+                                                        topic.getTopic()).get(i));
+                                    }
+                                }
+                                mAdapter.addData(items);
+                            }
+                        }
+                    },
+                    new Response.ErrorListener() {
+                        @Override
+                        public void onErrorResponse(VolleyError error) {
+                            Toast.makeText(getApplicationContext(), "Error getting articles", Toast.LENGTH_SHORT).show();
+                        }
+                    });
+            mVolleySingleton.addToRequestQueue(request);
+        }
+    }
+
     public boolean isFragmentVisible(){
+        // TODO: 12/6/16 Uncomment the statement
         Fragment settingFragment = getSupportFragmentManager().findFragmentByTag(getString(R.string.setting_fragment));
         Fragment detailFragment = getSupportFragmentManager().findFragmentByTag(getString(R.string.detail_fragment));
         return (settingFragment!= null
-                && detailFragment != null
-                && settingFragment.isVisible()
-                && detailFragment.isVisible());
+                //&& detailFragment != null
+                && settingFragment.isVisible());
+                //&& detailFragment.isVisible());
     }
 
     /*---------------------------------------------------------------------------------
