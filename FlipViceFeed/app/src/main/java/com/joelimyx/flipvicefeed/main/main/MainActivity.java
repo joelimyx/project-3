@@ -241,7 +241,7 @@ public class MainActivity extends AppCompatActivity
                         for (Tags article : tagList) {
                             List<String> tags = article.getTags();
                             for (String tag : tags) {
-                                if (tag == query {
+                                if (tag.equals(query)) {
 
 
                                 }
