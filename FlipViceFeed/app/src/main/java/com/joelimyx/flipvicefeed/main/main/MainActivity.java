@@ -12,6 +12,7 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.design.widget.NavigationView;
 import android.support.design.widget.Snackbar;
+import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v4.view.GravityCompat;
@@ -24,6 +25,7 @@ import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.transition.ChangeImageTransform;
 import android.transition.Fade;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -39,7 +41,9 @@ import com.google.gson.Gson;
 import com.joelimyx.flipvicefeed.R;
 import com.joelimyx.flipvicefeed.classes.GsonArticle;
 import com.joelimyx.flipvicefeed.classes.Item;
+import com.joelimyx.flipvicefeed.classes.TopicObject;
 import com.joelimyx.flipvicefeed.classes.VolleySingleton;
+import com.joelimyx.flipvicefeed.database.AlarmSQLHelper;
 import com.joelimyx.flipvicefeed.database.DBAssetHelper;
 import com.joelimyx.flipvicefeed.detailview.DetailActivity;
 import com.joelimyx.flipvicefeed.detailview.DetailFragment;
@@ -49,7 +53,10 @@ import com.joelimyx.flipvicefeed.setting.TopicFilterFragment;
 import com.joelimyx.flipvicefeed.splashscreen.WelcomeActivity;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 
 public class MainActivity extends AppCompatActivity
         implements MainAdapter.OnItemSelectedListener,
@@ -69,6 +76,7 @@ public class MainActivity extends AppCompatActivity
     private EndlessRecyclerViewScrollListener mScrollListener;
     private static final String TAG = "MainActivity";
     public static final String SPLASH_BOOLEAN = "first";
+    private int mStack = 0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -137,7 +145,7 @@ public class MainActivity extends AppCompatActivity
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         getSupportActionBar().setDefaultDisplayHomeAsUpEnabled(true);
-        getSupportActionBar().setTitle("Latest");
+
 
         //RecyclerView
         mMainRecyclerView = (RecyclerView) findViewById(R.id.main_recyclerview);
@@ -181,15 +189,22 @@ public class MainActivity extends AppCompatActivity
         ConnectivityManager manager = (ConnectivityManager) getSystemService(CONNECTIVITY_SERVICE);
         NetworkInfo networkInfo = manager.getActiveNetworkInfo();
         if (networkInfo != null && networkInfo.isConnected()) {
-            getLatestNews(0);
+            if (AlarmSQLHelper.getInstance(this).getFavoriteTopics().size()==0) {
+                getLatestNews(0);
+                getSupportActionBar().setTitle("Latest");
+            }else {
+                getMyFeed(0);
+                getSupportActionBar().setTitle("My Feed");
+            }
         } else {
             mSnackbar.show();
         }
+
         //Default Fragment Image Place Holder
         if (mTwoPane){
             getSupportFragmentManager()
                     .beginTransaction()
-                    .replace(R.id.fragment_container,PlaceHolderFragment.newInstance())
+                    .replace(R.id.fragment_container,PlaceHolderFragment.newInstance(),getString(R.string.place_holder_fragment))
                     .commit();
         }
     }
@@ -202,11 +217,13 @@ public class MainActivity extends AppCompatActivity
     public void onItemSelected(int id, View view) {
         if (mTwoPane) {
             FragmentManager fragmentManager = getSupportFragmentManager();
-            FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
-
-            DetailFragment detailFragment = DetailFragment.newInstance(id);
-            fragmentTransaction.replace(R.id.fragment_container, detailFragment);
-            fragmentTransaction.commit();
+            if (isFragmentVisible()) {
+                fragmentManager.popBackStack();
+            }
+            fragmentManager.beginTransaction()
+                    .replace(R.id.fragment_container,DetailFragment.newInstance(id))
+                    .addToBackStack(null)
+                    .commit();
         } else {
             Intent intent = new Intent(this, DetailActivity.class);
             intent.putExtra("id", id);
@@ -235,6 +252,23 @@ public class MainActivity extends AppCompatActivity
                 getSupportActionBar().setTitle("Latest");
                 sharedPreferences.edit().putString(getString(R.string.current_filter),"latest").commit();
                 mSwipeRefreshLayout.setRefreshing(false);
+                return true;
+            //Grab the latest news
+            case R.id.myfeed:
+                if (AlarmSQLHelper.getInstance(this).getFavoriteTopics().size()==0){
+                    getLatestNews(0);
+                    mDrawerLayout.closeDrawer(GravityCompat.START);
+                    getSupportActionBar().setTitle("Latest");
+                    sharedPreferences.edit().putString(getString(R.string.current_filter),"latest").commit();
+                    Toast.makeText(this, "You have no favorite topic selected", Toast.LENGTH_SHORT).show();
+                    mSwipeRefreshLayout.setRefreshing(false);
+                }else {
+                    getMyFeed(0);
+                    mDrawerLayout.closeDrawer(GravityCompat.START);
+                    getSupportActionBar().setTitle("My Feed");
+                    sharedPreferences.edit().putString(getString(R.string.current_filter), "my feed").commit();
+                    mSwipeRefreshLayout.setRefreshing(false);
+                }
                 return true;
 
             //Else grab the news according to the topic selected
@@ -270,18 +304,25 @@ public class MainActivity extends AppCompatActivity
             case R.id.alarm_settings:
             case R.id.topic_setting:
                 if (mTwoPane){
-                    if (item.getTitle().equals(getString(R.string.topic_filter))){
+                    //If there is a setting fragment visible, replace it
+                    if (isFragmentVisible()) {
+                        getSupportFragmentManager().popBackStack();
+                    }
+                    if (item.getTitle().equals(getString(R.string.topic_filter))) {
                         getSupportFragmentManager()
                                 .beginTransaction()
-                                .replace(R.id.fragment_container,new TopicFilterFragment())
+                                .replace(R.id.fragment_container, new TopicFilterFragment(), getString(R.string.setting_fragment))
+                                .addToBackStack(null)
                                 .commit();
-                    }else{
+                    } else {
                         getSupportFragmentManager()
                                 .beginTransaction()
-                                .replace(R.id.fragment_container,new NotificationFragment())
+                                .replace(R.id.fragment_container, new NotificationFragment(), getString(R.string.setting_fragment))
+                                .addToBackStack(null)
                                 .commit();
                     }
-                }else {
+                }else{
+
                     Intent intent = new Intent(this, SettingActivity.class);
                     intent.putExtra("setting", item.getTitle());
                     startActivity(intent);
@@ -306,6 +347,8 @@ public class MainActivity extends AppCompatActivity
         if (currentFilter!=null){
             if(currentFilter.equals("latest")) {
                 getLatestNews(0);
+            }else if(currentFilter.equals("my feed")){
+                getMyFeed(0);
             }else{
                 mAdapter.swapData(currentFilter);
                 mScrollListener.resetState();
@@ -365,7 +408,11 @@ public class MainActivity extends AppCompatActivity
         if (currentFilter!=null){
             if(currentFilter.equals("latest")) {
                 url+=page;
-            }else{
+            }else if(currentFilter.equals("my feed")){
+                addMyFeed(page);
+                return;
+            }
+            else{
                 url+="category/"+currentFilter+"/"+page;
             }
         }
@@ -389,14 +436,151 @@ public class MainActivity extends AppCompatActivity
                     }
                 });
         mVolleySingleton.addToRequestQueue(request);
-
     }
 
+    /**
+     * Get the latest feed according to your topic list in favorite
+     * @param page next page to load
+     */
+    private void getMyFeed(int page){
+        final List<TopicObject> favoriteTopics = AlarmSQLHelper.getInstance(this).getFavoriteTopics();
+        final Map<String, List<Item>> myFeedMap = new HashMap<>();
+        final List<Item> myFeedArticles = new LinkedList<>();
+        int articlesPerTopic = 1;
+        SharedPreferences sharedPreferences = getSharedPreferences(getString(R.string.preference_current_filter),MODE_PRIVATE);
+        sharedPreferences.edit().putString(getString(R.string.current_filter),"my feed").commit();
 
+        if (favoriteTopics.size() <= 3){
+            articlesPerTopic = 6;
+        }else if(favoriteTopics.size() <=7){
+            articlesPerTopic = 3;
+        }else if (favoriteTopics.size() >7){
+            articlesPerTopic++;
+        }
+
+        //Make as many api call as there are for favorite topic
+        for (int j = 0; j < favoriteTopics.size(); j++) {
+            final String topic = favoriteTopics.get(j).getTopic();
+            String url = "http://vice.com/api/getlatest/category/"+ topic + "/" + page;
+            final int finalArticlesPerTopic = articlesPerTopic;
+            StringRequest request = new StringRequest(Request.Method.GET, url,
+                    new Response.Listener<String>() {
+                        @Override
+                        public void onResponse(String response) {
+
+                            //Extracting data
+                            GsonArticle gsonArticle = new Gson().fromJson(response,GsonArticle.class);
+                            List<Item> items = gsonArticle.getData().getItems();
+
+                            myFeedMap.put(topic,items);
+                            if (myFeedMap.size()==favoriteTopics.size()){
+
+                                //Append articles to my feed
+                                for (int i = 0; i < finalArticlesPerTopic; i++) {
+                                    for (TopicObject topic : favoriteTopics) {
+                                        Log.d(TAG, "onResponse: "+topic.getTopic()+" map size: "+myFeedMap.size());
+                                        myFeedArticles
+                                                .add(myFeedMap.get(
+                                                        topic.getTopic()).get(i));
+                                    }
+                                }
+                                mAdapter = new MainAdapter(myFeedArticles,MainActivity.this,MainActivity.this);
+                                mMainRecyclerView.setAdapter(mAdapter);
+                                mSwipeRefreshLayout.setRefreshing(false);
+                            }
+                        }
+                    },
+                    new Response.ErrorListener() {
+                        @Override
+                        public void onErrorResponse(VolleyError error) {
+                            Toast.makeText(getApplicationContext(), "Error getting articles", Toast.LENGTH_SHORT).show();
+                        }
+                    });
+            mVolleySingleton.addToRequestQueue(request);
+        }
+    }
+
+    /**
+     * Helper method for endless scroll
+     * @param page next page to load
+     */
+    private void addMyFeed(int page){
+        final List<TopicObject> favoriteTopics = AlarmSQLHelper.getInstance(this).getFavoriteTopics();
+        final Map<String, List<Item>> myFeedMap = new HashMap<>();
+        final List<Item> myFeedArticles = new LinkedList<>();
+        int articlesPerTopic = 1;
+
+        if (favoriteTopics.size() <= 3){
+            articlesPerTopic = 6;
+        }else if(favoriteTopics.size() <=7){
+            articlesPerTopic = 3;
+        }else if (favoriteTopics.size() >7){
+            articlesPerTopic++;
+        }
+
+        //Make as many api call as there are for favorite topic
+        for (int j = 0; j < favoriteTopics.size(); j++) {
+            final String topic = favoriteTopics.get(j).getTopic();
+            String url = "http://vice.com/api/getlatest/category/"+ topic + "/" + page;
+            final int finalArticlesPerTopic = articlesPerTopic;
+            StringRequest request = new StringRequest(Request.Method.GET, url,
+                    new Response.Listener<String>() {
+                        @Override
+                        public void onResponse(String response) {
+
+                            //Extracting data
+                            GsonArticle gsonArticle = new Gson().fromJson(response,GsonArticle.class);
+                            List<Item> items = gsonArticle.getData().getItems();
+
+                            myFeedMap.put(topic,items);
+                            if (myFeedMap.size()==favoriteTopics.size()){
+
+                                //Append articles to my feed
+                                for (int i = 0; i < finalArticlesPerTopic; i++) {
+                                    for (TopicObject topic : favoriteTopics) {
+                                        Log.d(TAG, "onResponse: "+topic.getTopic()+" map size: "+myFeedMap.size());
+                                        myFeedArticles
+                                                .add(myFeedMap.get(
+                                                        topic.getTopic()).get(i));
+                                    }
+                                }
+                                mAdapter.addData(items);
+                            }
+                        }
+                    },
+                    new Response.ErrorListener() {
+                        @Override
+                        public void onErrorResponse(VolleyError error) {
+                            Toast.makeText(getApplicationContext(), "Error getting articles", Toast.LENGTH_SHORT).show();
+                        }
+                    });
+            mVolleySingleton.addToRequestQueue(request);
+        }
+    }
+
+    /**
+     * mStack is used to track if a fragment is on top
+     * @return if A fragment is on top of the place holder fragment
+     */
+    private boolean isFragmentVisible(){
+        Fragment placeHolderFragment = getSupportFragmentManager().findFragmentByTag(getString(R.string.place_holder_fragment));
+        if (placeHolderFragment.isVisible()) {
+            mStack++;
+            return false;
+        }
+        return mStack ==1;
+    }
+
+    @Override
+    public void onBackPressed() {
+        super.onBackPressed();
+        mStack--;
+        getSupportFragmentManager().popBackStack();
+    }
 
     /*---------------------------------------------------------------------------------
-    // Network State AREA
-    ---------------------------------------------------------------------------------*/
+        // Network State AREA
+        ---------------------------------------------------------------------------------*/
     //Network State Listener to show or dismiss snackbar
     public static class NetworkStateReceiver extends BroadcastReceiver {
 
