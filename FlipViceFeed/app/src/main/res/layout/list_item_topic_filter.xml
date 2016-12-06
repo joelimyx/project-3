@@ -1,27 +1,29 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
               android:layout_width="match_parent"
               android:layout_height="wrap_content"
-    android:layout_marginTop="5dp"
-    android:layout_marginBottom="5dp">
+              android:id="@+id/topic_item_layout"
+              android:paddingTop="5dp"
+              android:paddingBottom="5dp">
+
     <CheckBox
         android:id="@+id/filter_checkbox"
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginRight="8dp"
-        android:layout_alignParentRight="true"
-        android:layout_centerVertical="true"/>
+        android:button="@null"
+        android:drawableRight="?android:attr/listChoiceIndicatorMultiple"
+        />
+
     <TextView
         android:id="@+id/topic"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_centerVertical="true"
-        android:layout_toLeftOf="@id/filter_checkbox"
         android:text="Testing Stuff"
         android:gravity="center_horizontal"
+        android:layout_marginRight="20dp"
         android:textSize="24sp"
         android:fontFamily="sans-serif-condensed"
-        android:textColor="#000000"
-        />
+        android:textColor="#000000"/>
 
-</RelativeLayout>
+    </FrameLayout>
