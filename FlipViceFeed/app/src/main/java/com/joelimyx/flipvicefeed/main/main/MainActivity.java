@@ -12,6 +12,7 @@ import android.support.annotation.NonNull;
 import android.support.design.widget.NavigationView;
 import android.support.design.widget.Snackbar;
 import android.support.transition.TransitionSet;
+import android.support.v4.app.Fragment;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v4.widget.SwipeRefreshLayout;
@@ -261,16 +262,34 @@ public class MainActivity extends AppCompatActivity
             case R.id.alarm_settings:
             case R.id.topic_setting:
                 if (mTwoPane){
-                    if (item.getTitle().equals(getString(R.string.topic_filter))){
-                        getSupportFragmentManager()
-                                .beginTransaction()
-                                .replace(R.id.fragment_container,new TopicFilterFragment())
-                                .commit();
-                    }else{
-                        getSupportFragmentManager()
-                                .beginTransaction()
-                                .replace(R.id.fragment_container,new NotificationFragment())
-                                .commit();
+                    //If there is a setting fragment visible, replace it
+                    if (isFragmentVisible()) {
+                        if (item.getTitle().equals(getString(R.string.topic_filter))) {
+                            getSupportFragmentManager()
+                                    .beginTransaction()
+                                    .replace(R.id.fragment_container, new TopicFilterFragment(), getString(R.string.setting_fragment))
+                                    .commit();
+                        } else {
+                            getSupportFragmentManager()
+                                    .beginTransaction()
+                                    .replace(R.id.fragment_container, new NotificationFragment(), getString(R.string.setting_fragment))
+                                    .commit();
+                        }
+                    }//else add to back stack
+                    else{
+                        if (item.getTitle().equals(getString(R.string.topic_filter))) {
+                            getSupportFragmentManager()
+                                    .beginTransaction()
+                                    .replace(R.id.fragment_container, new TopicFilterFragment(), getString(R.string.setting_fragment))
+                                    .addToBackStack(null)
+                                    .commit();
+                        } else {
+                            getSupportFragmentManager()
+                                    .beginTransaction()
+                                    .replace(R.id.fragment_container, new NotificationFragment(), getString(R.string.setting_fragment))
+                                    .addToBackStack(null)
+                                    .commit();
+                        }
                     }
                 }else {
                     Intent intent = new Intent(this, SettingActivity.class);
@@ -380,7 +399,14 @@ public class MainActivity extends AppCompatActivity
                     }
                 });
         mVolleySingleton.addToRequestQueue(request);
-
+    }
+    public boolean isFragmentVisible(){
+        Fragment settingFragment = getSupportFragmentManager().findFragmentByTag(getString(R.string.setting_fragment));
+        Fragment detailFragment = getSupportFragmentManager().findFragmentByTag(getString(R.string.detail_fragment));
+        return (settingFragment!= null
+                && detailFragment != null
+                && settingFragment.isVisible()
+                && detailFragment.isVisible());
     }
 
     /*---------------------------------------------------------------------------------
