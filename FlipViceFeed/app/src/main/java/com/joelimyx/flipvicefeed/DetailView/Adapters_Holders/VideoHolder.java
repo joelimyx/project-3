@@ -23,14 +23,8 @@ public class VideoHolder extends RecyclerView.ViewHolder {
     }
 
     public void bindDataToViews(String url, Context context){
-
-
-
         WebSettings webSettings = mVideo.getSettings();
         webSettings.setJavaScriptEnabled(true);
         mVideo.loadData(url, "text/html", null);
-
-
-
     }
 }

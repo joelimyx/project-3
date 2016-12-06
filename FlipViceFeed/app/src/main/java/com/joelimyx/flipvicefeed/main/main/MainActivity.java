@@ -16,6 +16,8 @@ import android.os.Build;
 import android.support.annotation.NonNull;
 import android.support.design.widget.NavigationView;
 import android.support.design.widget.Snackbar;
+import android.support.v4.app.FragmentManager;
+import android.support.v4.app.FragmentTransaction;
 import android.support.v4.util.Pair;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
@@ -45,6 +47,7 @@ import com.joelimyx.flipvicefeed.database.DBAssetHelper;
 import com.joelimyx.flipvicefeed.classes.GsonArticle;
 import com.joelimyx.flipvicefeed.classes.Item;
 import com.joelimyx.flipvicefeed.classes.VolleySingleton;
+import com.joelimyx.flipvicefeed.detailview.DetailFragment;
 import com.joelimyx.flipvicefeed.setting.NotificationFragment;
 import com.joelimyx.flipvicefeed.setting.SettingActivity;
 import com.joelimyx.flipvicefeed.setting.TopicFilterFragment;
@@ -89,6 +92,12 @@ public class MainActivity extends AppCompatActivity
                 .putBoolean(SPLASH_BOOLEAN, false).commit();
 
         //Reference
+        if (findViewById(R.id.fragment_container) != null){
+            mTwoPane = true;
+        }else {
+            mTwoPane = false;
+        }
+
         mTwoPane = findViewById(R.id.fragment_container)!=null;
         mSwipeRefreshLayout = (SwipeRefreshLayout) findViewById(R.id.swipe_refresh);
         mVolleySingleton = VolleySingleton.getInstance(this);
@@ -162,9 +171,18 @@ public class MainActivity extends AppCompatActivity
     @Override
     public void onItemSelected(int id) {
         //// TODO: 11/30/16 start detail activity if not in tablet else start detail fragment
-        Intent intent = new Intent(this, DetailActivity.class);
-        intent.putExtra("id", id);
-        startActivity(intent);
+        if (mTwoPane){
+            FragmentManager fragmentManager = getSupportFragmentManager();
+            FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
+
+            DetailFragment detailFragment = DetailFragment.newInstance(id);
+            fragmentTransaction.replace(R.id.fragment_container, detailFragment);
+            fragmentTransaction.commit();
+        }else {
+            Intent intent = new Intent(this, DetailActivity.class);
+            intent.putExtra("id", id);
+            startActivity(intent);
+        }
     }
 
     /*---------------------------------------------------------------------------------
