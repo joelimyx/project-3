@@ -260,8 +260,8 @@ public class MainActivity extends AppCompatActivity
                     mDrawerLayout.closeDrawer(GravityCompat.START);
                     getSupportActionBar().setTitle("Latest");
                     sharedPreferences.edit().putString(getString(R.string.current_filter),"latest").commit();
-                    mSwipeRefreshLayout.setRefreshing(false);
                     Toast.makeText(this, "You have no favorite topic selected", Toast.LENGTH_SHORT).show();
+                    mSwipeRefreshLayout.setRefreshing(false);
                 }else {
                     getMyFeed(0);
                     mDrawerLayout.closeDrawer(GravityCompat.START);
@@ -349,8 +349,7 @@ public class MainActivity extends AppCompatActivity
                 getLatestNews(0);
             }else if(currentFilter.equals("my feed")){
                 getMyFeed(0);
-            }
-            else{
+            }else{
                 mAdapter.swapData(currentFilter);
                 mScrollListener.resetState();
             }
