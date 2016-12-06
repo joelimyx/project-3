@@ -67,29 +67,32 @@ public class NotificationService extends JobService {
 
             @Override
             protected void onPostExecute(Void aVoid) {
-                //With the favorite topic, setup a call to get the latest in that category
+                //With the favorite topic, setup a call to get the latest in that category.
                 url = "http://vice.com/api/getlatest/category/" + mRandomFavorite.getTopic();
                 if (mArticleList != null) {
                     mArticleList.clear();
                 }
-                Log.d(TAG, "onPostExecute: ");
-
+                        //Make a volley request to get the latest articles in that topic.
                         StringRequest request = new StringRequest(Request.Method.GET, url,
                                 new Response.Listener<String>() {
                                     @Override
                                     public void onResponse(String response) {
-                                        Log.d(TAG, "onResponse: Getting items.");
+                                        //Parse the data into a list of GSON objects.
                                         GsonArticle gsonArticle = new Gson().fromJson(response, GsonArticle.class);
                                         mArticleList = gsonArticle.getData().getItems();
-                                        Log.d(TAG, "onResponse: Got the items. DOING WELL SO FAR!");
+
+                                        //Get the thumbnail for the most recent article in that random topic.
                                         imageUrl = mArticleList.get(0).getThumb();
 
+                                        //Make a volley request to turn the thumbnail URL we just got into a bitmap.
                                         ImageRequest request2 = new ImageRequest(imageUrl,
                                                 new Response.Listener<Bitmap>() {
                                                     @Override
                                                     public void onResponse(Bitmap response) {
+
+                                                        //Set up the custom notification with the random topic and the thumbnail bitmap we just
+                                                        //converted from a URL. Build the notification and send it.
                                                         RemoteViews customNotificationView = new RemoteViews(PACKAGE_NAME, R.layout.notification_bar_remoteview);
-                                                        Log.d(TAG, "onResponse: URI! AH!" + mArticleList.get(0).getThumb());
                                                         customNotificationView.setImageViewBitmap(R.id.remote_image_background, response);
                                                         customNotificationView.setImageViewResource(R.id.remote_edgefade, R.drawable.edge_fades);
                                                         customNotificationView.setTextViewText(R.id.remote_textshadow, SEE_NEW_STORIES + mRandomFavorite.getTopic());
@@ -131,13 +134,14 @@ public class NotificationService extends JobService {
                     }
                 }.execute();
 
-        Log.d(TAG, "onStartJob: FINISHED?");
-        jobFinished(jobParameters, true);
-        return true;
+        jobFinished(jobParameters, false);
+        //false since we're done with the job.
+        return false;
     }
 
     @Override
     public boolean onStopJob(JobParameters jobParameters) {
-        return true;
+        //false since we don't want to reschedule it.
+        return false;
     }
 }
