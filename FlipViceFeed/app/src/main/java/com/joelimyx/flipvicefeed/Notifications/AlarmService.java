@@ -20,6 +20,8 @@ public class AlarmService {
     public AlarmService(Context context, int id) {
         this.context = context;
         ALARM_ID = id;
+
+        //The intent with the alarm that we send to the AlarmReceiver.
         mSender = PendingIntent.getBroadcast(context, ALARM_ID,
                 new Intent(context, AlarmReceiver.class), PendingIntent.FLAG_UPDATE_CURRENT);
     }
@@ -27,12 +29,18 @@ public class AlarmService {
     public void cancel(Context context){
         this.context = context;
 
+        //If there's alarms running, this cancels them all.
+        //Called every time new alarms are set.
         if(alarmMan!=null) {
             alarmMan.cancel(mSender);
         }
     }
 
     public void startAlarm(int hour, int minute, int day){
+
+        //Got the day and time from the notifications settings.
+        //Now use those to set the day and time an alarm will be set for
+        //To shoot a notification at that time.
 
         Calendar c = Calendar.getInstance();
         c.set(Calendar.DAY_OF_WEEK,day);
@@ -41,8 +49,11 @@ public class AlarmService {
         c.set(Calendar.SECOND,0);
         long thisTime = c.getTimeInMillis();
 
+        //Get the alarm manager to set the incoming alarm.
         alarmMan = (AlarmManager)context.getSystemService(Context.ALARM_SERVICE);
 
+        //An alarm is set for any day checked off at the given time,
+        //to be repeated every week.
         alarmMan.setRepeating(
                 AlarmManager.RTC_WAKEUP,
                 thisTime,

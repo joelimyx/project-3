@@ -26,7 +26,6 @@ public class AlarmReceiver extends BroadcastReceiver {
     public static final int NOTIFICATION_ID = 0;
     public static final String PACKAGE_NAME = "com.joelimyx.flipvicefeed";
     public static final String NEW_STORIES_DEFAULT = "Check out the latest stories!";
-    public static final String SEE_NEW_STORIES = "New stories in: ";
 
     @Override
     public void onReceive(Context context, Intent intent) {
@@ -67,7 +66,8 @@ public class AlarmReceiver extends BroadcastReceiver {
             NotificationCompat.Builder mBuilder = new NotificationCompat.Builder(context);
 
             Intent defaultIntent = new Intent(context, MainActivity.class);
-            PendingIntent pendingIntent = PendingIntent.getActivity(context,0,intent,0);
+            PendingIntent pendingIntent = PendingIntent.getActivity(context,0,defaultIntent,0);
+
 
             Notification notification = mBuilder.setSmallIcon(R.drawable.ic_vooz)
                     .setContentTitle(NEW_STORIES_DEFAULT)
