@@ -1,22 +1,17 @@
 package com.joelimyx.flipvicefeed.main.main;
 
-import android.app.Activity;
-import android.app.ActivityOptions;
 import android.content.Intent;
 import android.app.SearchManager;
 import android.content.BroadcastReceiver;
 import android.content.Context;
-import android.content.Intent;
-import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
+import android.nfc.Tag;
 import android.os.AsyncTask;
-import android.os.Build;
 import android.support.annotation.NonNull;
 import android.support.design.widget.NavigationView;
 import android.support.design.widget.Snackbar;
-import android.support.v4.util.Pair;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v4.widget.SwipeRefreshLayout;
@@ -25,8 +20,8 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.SearchView;
 import android.support.v7.widget.Toolbar;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -39,6 +34,10 @@ import com.android.volley.toolbox.StringRequest;
 
 import com.facebook.FacebookSdk;
 import com.google.gson.Gson;
+import com.joelimyx.flipvicefeed.classes.Data;
+import com.joelimyx.flipvicefeed.classes.ItemsWithTags;
+import com.joelimyx.flipvicefeed.classes.Tags;
+import com.joelimyx.flipvicefeed.classes.DataRootWithTags;
 import com.joelimyx.flipvicefeed.detailview.DetailActivity;
 import com.joelimyx.flipvicefeed.R;
 import com.joelimyx.flipvicefeed.database.DBAssetHelper;
@@ -55,7 +54,7 @@ import java.util.List;
 public class MainActivity extends AppCompatActivity
         implements MainAdapter.OnItemSelectedListener,
         NavigationView.OnNavigationItemSelectedListener,
-        SwipeRefreshLayout.OnRefreshListener{
+        SwipeRefreshLayout.OnRefreshListener {
 
     private ActionBarDrawerToggle mToggle;
     private RecyclerView mMainRecyclerView;
@@ -75,7 +74,7 @@ public class MainActivity extends AppCompatActivity
         setContentView(R.layout.activity_main);
 
         //Reference
-        mTwoPane = findViewById(R.id.fragment_container)!=null;
+        mTwoPane = findViewById(R.id.fragment_container) != null;
         mSwipeRefreshLayout = (SwipeRefreshLayout) findViewById(R.id.swipe_refresh);
         mVolleySingleton = VolleySingleton.getInstance(this);
 
@@ -99,9 +98,9 @@ public class MainActivity extends AppCompatActivity
 
         //RecyclerView
         mMainRecyclerView = (RecyclerView) findViewById(R.id.main_recyclerview);
-        LinearLayoutManager layoutManager = new LinearLayoutManager(this,LinearLayoutManager.VERTICAL,false);
+        LinearLayoutManager layoutManager = new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false);
         mMainRecyclerView.setLayoutManager(layoutManager);
-        mMainRecyclerView.setAdapter(new MainAdapter(new ArrayList<Item>(),this,this));
+        mMainRecyclerView.setAdapter(new MainAdapter(new ArrayList<Item>(), this, this));
 
         //Endless Scroll for Main RecyclerView
         mScrollListener = new EndlessRecyclerViewScrollListener(layoutManager) {
@@ -159,14 +158,14 @@ public class MainActivity extends AppCompatActivity
     @Override
     public boolean onNavigationItemSelected(@NonNull MenuItem item) {
         mSwipeRefreshLayout.setRefreshing(true);
-        SharedPreferences sharedPreferences = getSharedPreferences(getString(R.string.preference_current_filter),MODE_PRIVATE);
-        switch (item.getItemId()){
+        SharedPreferences sharedPreferences = getSharedPreferences(getString(R.string.preference_current_filter), MODE_PRIVATE);
+        switch (item.getItemId()) {
             //Grab the latest news
             case R.id.latest:
                 getLatestNews(0);
                 mDrawerLayout.closeDrawer(GravityCompat.START);
                 getSupportActionBar().setTitle("Latest");
-                sharedPreferences.edit().putString(getString(R.string.current_filter),"latest").commit();
+                sharedPreferences.edit().putString(getString(R.string.current_filter), "latest").commit();
                 mSwipeRefreshLayout.setRefreshing(false);
                 return true;
 
@@ -176,7 +175,7 @@ public class MainActivity extends AppCompatActivity
                 mScrollListener.resetState();
                 mDrawerLayout.closeDrawer(GravityCompat.START);
                 mMainRecyclerView.scrollToPosition(0);
-                if (getSupportActionBar()!=null) {
+                if (getSupportActionBar() != null) {
                     getSupportActionBar().setTitle(item.getTitle());
                 }
                 sharedPreferences.edit().putString(getString(R.string.current_filter), (String) item.getTitle()).commit();
@@ -188,13 +187,106 @@ public class MainActivity extends AppCompatActivity
     /*---------------------------------------------------------------------------------
     // Toolbar AREA
     ---------------------------------------------------------------------------------*/
-    //Inflate Toolbar
+
+    //Inflate And Setup Search View
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         MenuInflater inflater = getMenuInflater();
-        inflater.inflate(R.menu.menu, menu);
+        inflater.inflate(R.menu.search_menu, menu);
+
+        SearchManager searchManager = (SearchManager) getSystemService(Context.SEARCH_SERVICE);
+        SearchView searchView = (SearchView) menu.findItem(R.id.search)
+                .getActionView();
+
+        if (null != searchView) {
+            searchView.setSearchableInfo(searchManager
+                    .getSearchableInfo(getComponentName()));
+            searchView.setIconifiedByDefault(false);
+        }
+
+        final SearchView.OnQueryTextListener queryTextListener =
+                new SearchView.OnQueryTextListener() {
+
+                    public boolean onQueryTextChange(String newText) {
+                        // Adapter that will be filtered
+                        return true;
+                    }
+
+                    public boolean onQueryTextSubmit(String query) {
+                        returnSearchTypes(query);
+                        return true;
+                    }
+                };
+
+        assert searchView != null;
+        searchView.setOnQueryTextListener(queryTextListener);
+
         return super.onCreateOptionsMenu(menu);
+
     }
+
+    private void returnSearchTypes(final String query) {
+
+        // Instantiate the RequestQueue
+        String url = "http://vice.com/api/getlatest/1";
+
+        // Request a string response from the provided URL
+        StringRequest stringRequest = new StringRequest(Request.Method.GET, url,
+                new Response.Listener<String>() {
+
+                    @Override
+                    public void onResponse(String response) {
+                        DataRootWithTags dataRootWithTags = new Gson().fromJson(response, DataRootWithTags.class);
+                        List<Tags> tagList = dataRootWithTags.getData().getItems();
+                        for (Tags article : tagList) {
+                            List<String> tags = article.getTags();
+                            for (String tag : tags) {
+                                if (tag == query {
+
+
+                                }
+
+                            }
+                        }
+
+
+                    }
+                },
+                new Response.ErrorListener() {
+                    @Override
+                    public void onErrorResponse(VolleyError error) {
+                        Toast.makeText(getApplicationContext(), "Error getting articles", Toast.LENGTH_SHORT).show();
+                    }
+                });
+
+        mVolleySingleton.addToRequestQueue(stringRequest);
+    }
+
+//
+//        // Instantiate the RequestQueue
+//        String url = "http://vice.com/api/getlatest/" + queryText;
+//
+//        // Request a string response from the provided URL
+//        StringRequest stringRequest = new StringRequest(Request.Method.GET, url,
+//                new Response.Listener<String>() {
+//                    @Override
+//                    public void onResponse(String response) {
+
+//                        GsonArticle gsonType = new Gson().fromJson(response, GsonArticle.class);
+////                      List<Item> items = gsonType.getData().getItems();
+
+//                        mAdapter.addData(items);
+//                    }
+//                },
+//                new Response.ErrorListener() {
+//                    @Override
+//                    public void onErrorResponse(VolleyError error) {
+//                        Toast.makeText(getApplicationContext(), "Error getting articles", Toast.LENGTH_SHORT).show();
+//                    }
+//                });
+//
+//        mVolleySingleton.addToRequestQueue(stringRequest);
+//    }
 
     //Select Option on Toolbar
     @Override
@@ -202,20 +294,20 @@ public class MainActivity extends AppCompatActivity
         switch (item.getItemId()) {
             case R.id.alarm_settings:
             case R.id.topic_setting:
-                if (mTwoPane){
-                    if (item.getTitle().equals(getString(R.string.topic_filter))){
+                if (mTwoPane) {
+                    if (item.getTitle().equals(getString(R.string.topic_filter))) {
                         getSupportFragmentManager()
                                 .beginTransaction()
-                                .replace(R.id.fragment_container,new TopicFilterFragment())
+                                .replace(R.id.fragment_container, new TopicFilterFragment())
                                 .commit();
-                    }else{
+                    } else {
 
                         getSupportFragmentManager()
                                 .beginTransaction()
-                                .replace(R.id.fragment_container,new NotificationFragment())
+                                .replace(R.id.fragment_container, new NotificationFragment())
                                 .commit();
                     }
-                }else {
+                } else {
                     Intent intent = new Intent(this, SettingActivity.class);
                     intent.putExtra("setting", item.getTitle());
                     startActivity(intent);
@@ -234,12 +326,12 @@ public class MainActivity extends AppCompatActivity
     //When refresh is initiated by swiping down at the very top
     @Override
     public void onRefresh() {
-        SharedPreferences sharedPreferences = getSharedPreferences(getString(R.string.preference_current_filter),MODE_PRIVATE);
-        String currentFilter = sharedPreferences.getString(getString(R.string.current_filter),null);
-        if (currentFilter!=null){
-            if(currentFilter.equals("latest")) {
+        SharedPreferences sharedPreferences = getSharedPreferences(getString(R.string.preference_current_filter), MODE_PRIVATE);
+        String currentFilter = sharedPreferences.getString(getString(R.string.current_filter), null);
+        if (currentFilter != null) {
+            if (currentFilter.equals("latest")) {
                 getLatestNews(0);
-            }else{
+            } else {
                 mAdapter.swapdata(currentFilter);
                 mScrollListener.resetState();
             }
@@ -253,12 +345,13 @@ public class MainActivity extends AppCompatActivity
 
     /**
      * Grab the latest news with selected page
+     *
      * @param page current page to grab
      */
-    private void getLatestNews(int page){
-        String url = "http://www.vice.com/api/getlatest/"+page;
-        SharedPreferences sharedPreferences = getSharedPreferences(getString(R.string.preference_current_filter),MODE_PRIVATE);
-        sharedPreferences.edit().putString(getString(R.string.current_filter),"latest").commit();
+    private void getLatestNews(int page) {
+        String url = "http://www.vice.com/api/getlatest/" + page;
+        SharedPreferences sharedPreferences = getSharedPreferences(getString(R.string.preference_current_filter), MODE_PRIVATE);
+        sharedPreferences.edit().putString(getString(R.string.current_filter), "latest").commit();
 
         StringRequest request = new StringRequest(Request.Method.GET, url,
                 new Response.Listener<String>() {
@@ -289,17 +382,19 @@ public class MainActivity extends AppCompatActivity
 
     /**
      * Helper method for adding article to recyclerview while scrolling
+     *
      * @param page
      */
-    private void addArticleToRecyclerView(int page){
-        SharedPreferences sharedPreferences = getSharedPreferences(getString(R.string.preference_current_filter),MODE_PRIVATE);
-        String currentFilter = sharedPreferences.getString(getString(R.string.current_filter),null);
+    private void addArticleToRecyclerView(int page) {
+
+        SharedPreferences sharedPreferences = getSharedPreferences(getString(R.string.preference_current_filter), MODE_PRIVATE);
+        String currentFilter = sharedPreferences.getString(getString(R.string.current_filter), null);
         String url = "http://www.vice.com/api/getlatest/";
-        if (currentFilter!=null){
-            if(currentFilter.equals("latest")) {
-                url+=page;
-            }else{
-                url+="category/"+currentFilter+"/"+page;
+        if (currentFilter != null) {
+            if (currentFilter.equals("latest")) {
+                url += page;
+            } else {
+                url += "category/" + currentFilter + "/" + page;
             }
         }
         StringRequest request = new StringRequest(Request.Method.GET, url,
@@ -308,7 +403,7 @@ public class MainActivity extends AppCompatActivity
                     public void onResponse(String response) {
 
                         //Extracting data
-                        GsonArticle gsonArticle = new Gson().fromJson(response,GsonArticle.class);
+                        GsonArticle gsonArticle = new Gson().fromJson(response, GsonArticle.class);
                         List<Item> items = gsonArticle.getData().getItems();
 
                         //Setup up adapter to recycler view
