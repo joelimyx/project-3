@@ -16,8 +16,9 @@
         android:layout_height="wrap_content"
         android:textSize="30sp"
         android:elevation="8sp"
-        android:background="@color/colorPrimaryDark"
-        android:textColor="#ffffff"/>
+        android:background="#000000"
+        android:textColor="#ffffff"
+        />
 
     <android.support.v7.widget.RecyclerView
         android:id="@+id/fragment_recyclerview"
