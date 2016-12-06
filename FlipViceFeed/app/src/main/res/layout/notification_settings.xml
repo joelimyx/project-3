@@ -39,7 +39,8 @@
             <CheckBox
                 android:id="@+id/mon_checkbox"
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content"/>
+                android:layout_height="wrap_content"
+                />
         </LinearLayout>
 
         <LinearLayout
@@ -141,9 +142,13 @@
     </LinearLayout>
     <Button
         android:id="@+id/testList"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_width="200dp"
+        android:layout_height="60dp"
         android:text="Save"
-        android:layout_marginTop="20dp"
+        android:fontFamily="sans-serif-condensed"
+        android:textSize="20dp"
+        android:textColor="#ffffff"
+        android:background="#000000"
+        android:layout_marginTop="40dp"
         android:layout_gravity="center_horizontal"/>
 </LinearLayout>

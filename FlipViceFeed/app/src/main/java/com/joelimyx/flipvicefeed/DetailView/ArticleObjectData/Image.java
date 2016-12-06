@@ -6,7 +6,7 @@ import com.squareup.picasso.Picasso;
  * Created by colinbradley on 11/30/16.
  */
 
-public class Image extends ArticleObject{
+public class Image extends ArticleObject {
 
     private String mURL;
 

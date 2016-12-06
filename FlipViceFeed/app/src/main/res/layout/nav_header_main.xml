@@ -2,9 +2,10 @@
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
              android:layout_width="match_parent"
              android:layout_height="wrap_content">
-    <!-- TODO change the source-->
 <ImageView
     android:src="@drawable/voozlogosmall"
-    android:layout_width="200dp"
-    android:layout_height="wrap_content"/>
+    android:layout_width="170dp"
+    android:layout_height="wrap_content"
+    android:layout_marginRight="20dp"
+    android:layout_marginLeft="10dp"/>
 </FrameLayout>

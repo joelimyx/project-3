@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              android:orientation="vertical"
+              android:layout_width="match_parent"
+              android:layout_height="match_parent">
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:textColor="#ffffff"
+        android:background="#000000"
+        android:textSize="30sp"
+        android:text="What topics do you like?"
+        android:paddingTop="10dp"
+        android:paddingBottom="10dp"
+        android:fontFamily="sans-serif-condensed"/>
+
+    <android.support.v7.widget.RecyclerView
+        android:id="@+id/splash_topics_recycler"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_weight="5"/>
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:background="#000000">
+
+        <Button
+            android:layout_gravity="center"
+            android:layout_width="200dp"
+            android:layout_height="60dp"
+            android:background="#ffffff"
+            android:textColor="#000000"
+            android:fontFamily="sans-serif-condensed"
+            android:textSize="20sp"
+            android:textStyle="bold"
+            android:layout_margin="30dp"
+            android:text="Continue"
+            android:onClick="thirdPageJumper"/>
+
+    </FrameLayout>
+
+
+</LinearLayout>

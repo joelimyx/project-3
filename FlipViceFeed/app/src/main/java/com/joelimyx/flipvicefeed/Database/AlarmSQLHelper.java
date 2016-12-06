@@ -110,7 +110,11 @@ public class AlarmSQLHelper extends SQLiteOpenHelper {
         Cursor cursor = db.query(
                 TOPIC_FILTER_TABLE,
                 TOPIC_COLUMNS,
-                null,null,null,null,null,null);
+                COL_TOPIC_SELECTED+" = ?",new String[]{"1"},
+                null,
+                null,
+                COL_TOPIC_NAME,
+                null);
         List<TopicObject> favoriteTopicList = new ArrayList<>();
         if(cursor.moveToFirst()){
             while(!cursor.isAfterLast()){
