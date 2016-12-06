@@ -19,4 +19,5 @@
     <string name="setting_fragment">setting fragment</string>
     <string name="detail_fragment">detail fragment</string>
     <string name="place_holder_fragment">Place holder</string>
+    <string name="favorite_size">favorite size</string>
 </resources>

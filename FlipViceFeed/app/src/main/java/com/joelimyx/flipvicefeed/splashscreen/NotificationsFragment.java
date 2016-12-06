@@ -2,6 +2,7 @@ package com.joelimyx.flipvicefeed.splashscreen;
 
 import android.app.Activity;
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -20,6 +21,7 @@ import com.joelimyx.flipvicefeed.R;
 import com.joelimyx.flipvicefeed.classes.TimeObject;
 import com.joelimyx.flipvicefeed.database.AlarmSQLHelper;
 import com.joelimyx.flipvicefeed.database.DBAssetHelper;
+import com.joelimyx.flipvicefeed.main.main.MainActivity;
 import com.joelimyx.flipvicefeed.notifications.AlarmService;
 import com.joelimyx.flipvicefeed.notifications.AlarmSettingsActivity;
 
@@ -39,8 +41,6 @@ public class NotificationsFragment extends Fragment {
     List<CheckBox> mCheckList;
     List<TimeObject> mTimeObjectList;
     AsyncTask<Void,Void,Void> mAsyncLoadData;
-//    FinishWelcomingListener mListener;
-
 
     @Nullable
     @Override
@@ -88,7 +88,7 @@ public class NotificationsFragment extends Fragment {
         skipThisStep.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                ((Activity)getContext()).finish();
+                finishWelcome();
             }
         });
 
@@ -123,15 +123,18 @@ public class NotificationsFragment extends Fragment {
                     }
                 }
                 Toast.makeText(getContext(), "Saved!", Toast.LENGTH_SHORT).show();
-//                mListener.finishWelcomeActivity();
-                ((Activity)getContext()).finish();
+            finishWelcome();
             }
         });
     }
 
-//    interface FinishWelcomingListener{
-//        void finishWelcomeActivity();
-//    }
+    public void finishWelcome(){
+
+        Intent intent = new Intent();
+        intent.putExtra(getString(R.string.favorite_size),AlarmSQLHelper.getInstance(getContext()).getFavoriteTopics().size());
+        ((Activity)getContext()).setResult(Activity.RESULT_OK,intent);
+        ((Activity)getContext()).finish();
+    }
 
 }
 
