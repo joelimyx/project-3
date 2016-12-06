@@ -39,6 +39,8 @@ import com.joelimyx.flipvicefeed.detailview.articleobjectdata.Video;
 import com.joelimyx.flipvicefeed.detailview.individualarticledata.Article;
 import com.joelimyx.flipvicefeed.detailview.individualarticledata.ArticleData;
 import com.joelimyx.flipvicefeed.detailview.individualarticledata.Example;
+import com.joelimyx.flipvicefeed.detailview.individualarticledata.Gallery;
+import com.joelimyx.flipvicefeed.detailview.individualarticledata.Media;
 import com.joelimyx.flipvicefeed.main.data.ShareGsonRootObject;
 import com.joelimyx.flipvicefeed.main.data.ShareItem;
 
@@ -66,6 +68,7 @@ public class DetailFragment extends Fragment {
     CallbackManager mCallbackManager;
     ShareDialog mShareDialog;
     ShareButton mShareButton;
+    List<ArticleObject> mMediaList;
 
 
 
@@ -104,6 +107,7 @@ public class DetailFragment extends Fragment {
 
         mTitle = (TextView)view.findViewById(R.id.fragment_title);
         mListOfObjectsInArticle = new ArrayList<>();
+        mMediaList = new ArrayList<>();
         mRecyclerView = (RecyclerView)view.findViewById(R.id.fragment_recyclerview);
         mRecyclerView.setLayoutManager(new LinearLayoutManager(getContext(),LinearLayoutManager.VERTICAL,false));
         mAdapter = new ArticleInfoAdapter(mListOfObjectsInArticle, getContext());
@@ -168,6 +172,21 @@ public class DetailFragment extends Fragment {
                 String imgURL = article.getThumb();
                 Log.d(TAG, "onResponse: THUMBNAIL pulled from ARTICLE: " + imgURL);
 
+                Media media = article.getMedia();
+                if (media != null){
+                    List<String> mediaList = new ArrayList<>();
+                    List<Gallery> gallery = media.getGallery();
+                    for (Gallery g:gallery){
+                        String imageLink = g.getImage();
+                        mediaList.add(imageLink);
+                    }
+                    for (String s:mediaList){
+                        Image image = new Image(s);
+                        mMediaList.add(image);
+                    }
+                }
+
+
                 mTitle.setText(title);
                 getDataFromHTML(body);
 
@@ -205,6 +224,9 @@ public class DetailFragment extends Fragment {
                         fullList.add(text);
                         Log.d(TAG, "getDataFromHTML: ADDED TEXT---- " +fullList.size());
                     }
+                }else if (e.html().contains("<img src")) {
+                    Log.d(TAG, "getDataFromHTML: GALLERY IMAGE FOUND --- " + e.html());
+
                 }else {
                     String imgSrc = e.html();
                     int indexStart = imgSrc.indexOf("http");
@@ -269,15 +291,15 @@ public class DetailFragment extends Fragment {
                 int indexStart = iframeHTML.indexOf("www");
                 int indexEnd = iframeHTML.indexOf("\" ");
                 String httpLessLink = iframeHTML.substring(indexStart, indexEnd);
-                Log.d(TAG, "getDataFromHTML: gathered link that has no https-- " +httpLessLink);
+                Log.d(TAG, "getDataFromHTML: gathered link that has no https-- " + httpLessLink);
 
                 String link = "https://" + httpLessLink;
-                Log.d(TAG, "getDataFromHTML: adds https:// ---- " +link);
+                Log.d(TAG, "getDataFromHTML: adds https:// ---- " + link);
 
                 Video video = new Video(iframeHTML);
 
                 fullList.add(video);
-            } else {
+            }else {
 
                 int indexStart = iframeHTML.indexOf("http");
                 int indexEnd = iframeHTML.indexOf("\" ");
@@ -306,6 +328,7 @@ public class DetailFragment extends Fragment {
 
     public void populateList(List<ArticleObject> list){
         mListOfObjectsInArticle.addAll(list);
+        mListOfObjectsInArticle.addAll(mMediaList);
         mAdapter.notifyDataSetChanged();
     }
 
