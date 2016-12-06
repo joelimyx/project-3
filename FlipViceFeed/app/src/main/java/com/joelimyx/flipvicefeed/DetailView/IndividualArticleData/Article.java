@@ -67,6 +67,14 @@ public class Article {
     @Expose
     private String thumb710;
 
+    @SerializedName("media")
+    @Expose
+    private Media media;
+
+    public Media getMedia(){
+        return media;
+    }
+
     /**
      *
      * @return

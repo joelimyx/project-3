@@ -37,6 +37,8 @@ import com.joelimyx.flipvicefeed.detailview.articleobjectdata.Video;
 import com.joelimyx.flipvicefeed.detailview.individualarticledata.Article;
 import com.joelimyx.flipvicefeed.detailview.individualarticledata.ArticleData;
 import com.joelimyx.flipvicefeed.detailview.individualarticledata.Example;
+import com.joelimyx.flipvicefeed.detailview.individualarticledata.Gallery;
+import com.joelimyx.flipvicefeed.detailview.individualarticledata.Media;
 import com.joelimyx.flipvicefeed.main.data.ShareGsonRootObject;
 import com.joelimyx.flipvicefeed.main.data.ShareItem;
 import com.squareup.picasso.Picasso;
@@ -60,6 +62,8 @@ public class DetailActivity extends AppCompatActivity {
     Toolbar mToolbar;
     CallbackManager mCallbackManager;
     ShareDialog mShareDialog;
+    List<ArticleObject> mMediaList;
+
 
     public static final String TAG = "DETAIL ACTIVITY";
 
@@ -109,7 +113,7 @@ public class DetailActivity extends AppCompatActivity {
         //FACEBOOK SHARING
         getDataForShare(id);
 
-
+        mMediaList = new ArrayList<>();
         mListOfObjectsInArticle = new ArrayList<>();
         //STARTS VOLLEY API SEARCH FOR INDIVIDUAL ARTICLE
         getArticleByID(idAsString);
@@ -161,6 +165,20 @@ public class DetailActivity extends AppCompatActivity {
                 String imgURL = article.getThumb();
                 Log.d(TAG, "onResponse: THUMBNAIL pulled from ARTICLE: " + imgURL);
                 mToolbarBackgroundImage = imgURL;
+
+                Media media = article.getMedia();
+                if (media != null){
+                    List<String> mediaList = new ArrayList<>();
+                    List<Gallery> gallery = media.getGallery();
+                    for (Gallery g:gallery){
+                        String imageLink = g.getImage();
+                        mediaList.add(imageLink);
+                    }
+                    for (String s:mediaList){
+                        Image image = new Image(s);
+                        mMediaList.add(image);
+                    }
+                }
 
                 setTitle(title,mToolbarBackgroundImage); //SENDS TITLE AND IMAGE TO THE TOOLBAR
 
@@ -326,6 +344,7 @@ public class DetailActivity extends AppCompatActivity {
 
     public void populateList(List<ArticleObject> list){
         mListOfObjectsInArticle.addAll(list); //ADDS LIST TO THE MAIN LIST AND
+        mListOfObjectsInArticle.addAll(mMediaList);
         mAdapter.notifyDataSetChanged();      //AND UPDATES ADAPTER
     }
 
