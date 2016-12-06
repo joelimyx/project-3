@@ -28,6 +28,12 @@
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:transitionName="@string/main_to_detail"/>
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:background="@drawable/edge_fades"
+                android:alpha=".62"/>
+
             <android.support.v7.widget.Toolbar
                 android:id="@+id/toolbar"
                 android:layout_width="match_parent"
@@ -39,7 +45,9 @@
         </android.support.design.widget.CollapsingToolbarLayout>
     </android.support.design.widget.AppBarLayout>
 
+
     <include layout="@layout/content_detail" />
+
 
     <com.facebook.share.widget.ShareButton
         android:id="@+id/fb_share_button"

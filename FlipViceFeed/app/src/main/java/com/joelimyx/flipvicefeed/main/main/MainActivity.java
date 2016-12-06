@@ -82,6 +82,18 @@ public class MainActivity extends AppCompatActivity
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        //Setup database
+                new AsyncTask<Void, Void, Void>() {
+                    @Override
+                    protected Void doInBackground(Void... voids) {
+                        DBAssetHelper dbSetup = new DBAssetHelper(MainActivity.this);
+                        dbSetup.getReadableDatabase();
+                        return null;
+                    }
+                }.execute();
+
+        //Show welcome screen on first run
+
         /*---------------------------------------------------------------------------------
         // Welcome AREA
         ---------------------------------------------------------------------------------*/
@@ -117,15 +129,7 @@ public class MainActivity extends AppCompatActivity
         mSwipeRefreshLayout = (SwipeRefreshLayout) findViewById(R.id.swipe_refresh);
         mVolleySingleton = VolleySingleton.getInstance(this);
 
-        //Setup database
-        new AsyncTask<Void, Void, Void>() {
-            @Override
-            protected Void doInBackground(Void... voids) {
-                DBAssetHelper dbSetup = new DBAssetHelper(MainActivity.this);
-                dbSetup.getReadableDatabase();
-                return null;
-            }
-        }.execute();
+
 
         mSnackbar = Snackbar.make(findViewById(R.id.drawer_layout), "No Network Available", Snackbar.LENGTH_INDEFINITE);
 
@@ -200,8 +204,11 @@ public class MainActivity extends AppCompatActivity
         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.LOLLIPOP) {
             Pair<View, String> mainPair = Pair.create(view.findViewById(R.id.article_item_image), getString(R.string.main_to_detail));
             mActivityOptions = ActivityOptions.makeSceneTransitionAnimation(MainActivity.this, mainPair);
+            startActivity(intent, mActivityOptions.toBundle());
         }
-        startActivity(intent, mActivityOptions.toBundle());
+        else{
+            startActivity(intent);
+        }
     }
 
     /*---------------------------------------------------------------------------------
@@ -374,12 +381,6 @@ public class MainActivity extends AppCompatActivity
                 });
         mVolleySingleton.addToRequestQueue(request);
 
-    }
-
-    public void getMyFeed(){
-        List<TopicObject> favorites = AlarmSQLHelper.getInstance(this).getFavoriteTopics();
-        if (favorites.size()>=4){
-        }
     }
 
     /*---------------------------------------------------------------------------------
