@@ -16,8 +16,7 @@
     <string name="main_to_detail">main2detail</string>
     <string name="app_bar_transition">app_bar_transition</string>
 
-    <!-- TODO: Remove or change this placeholder text -->
-    <string name="hello_blank_fragment">Hello blank fragment</string>
     <string name="setting_fragment">setting fragment</string>
     <string name="detail_fragment">detail fragment</string>
+    <string name="place_holder_fragment">Place holder</string>
 </resources>
