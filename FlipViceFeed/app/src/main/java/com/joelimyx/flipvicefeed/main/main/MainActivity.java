@@ -40,6 +40,8 @@ import com.android.volley.toolbox.StringRequest;
 
 import com.facebook.FacebookSdk;
 import com.google.gson.Gson;
+import com.joelimyx.flipvicefeed.classes.TopicObject;
+import com.joelimyx.flipvicefeed.database.AlarmSQLHelper;
 import com.joelimyx.flipvicefeed.detailview.DetailActivity;
 import com.joelimyx.flipvicefeed.R;
 import com.joelimyx.flipvicefeed.database.DBAssetHelper;
@@ -91,6 +93,10 @@ public class MainActivity extends AppCompatActivity
                 }.execute();
 
         //Show welcome screen on first run
+
+        /*---------------------------------------------------------------------------------
+        // Welcome AREA
+        ---------------------------------------------------------------------------------*/
         Boolean isFirstRun = getSharedPreferences("PREFERENCE", MODE_PRIVATE)
                 .getBoolean(SPLASH_BOOLEAN, true);
 
@@ -102,7 +108,7 @@ public class MainActivity extends AppCompatActivity
                 .putBoolean(SPLASH_BOOLEAN, false).commit();
 
         /*---------------------------------------------------------------------------------
-        // ANIMATION
+        // Animation AREA
         ---------------------------------------------------------------------------------*/
         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.LOLLIPOP){
             //Activity Transition
@@ -179,14 +185,20 @@ public class MainActivity extends AppCompatActivity
         } else {
             mSnackbar.show();
         }
+        //Default Fragment Image Place Holder
+        if (mTwoPane){
+            getSupportFragmentManager()
+                    .beginTransaction()
+                    .replace(R.id.fragment_container,PlaceHolderFragment.newInstance())
+                    .commit();
+        }
     }
 
     /*---------------------------------------------------------------------------------
-    // Interface from main Adapter
+    // Interface from main Adapter to call on detail activity or fragment
     ---------------------------------------------------------------------------------*/
     @Override
     public void onItemSelected(int id, View view) {
-        //// TODO: 11/30/16 start detail activity if not in tablet else start detail fragment
         Intent intent = new Intent(this, DetailActivity.class);
         intent.putExtra("id", id);
         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.LOLLIPOP) {
