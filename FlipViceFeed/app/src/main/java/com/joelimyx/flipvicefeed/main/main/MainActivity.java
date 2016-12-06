@@ -255,11 +255,20 @@ public class MainActivity extends AppCompatActivity
                 return true;
             //Grab the latest news
             case R.id.myfeed:
-                getMyFeed(0);
-                mDrawerLayout.closeDrawer(GravityCompat.START);
-                getSupportActionBar().setTitle("My Feed");
-                sharedPreferences.edit().putString(getString(R.string.current_filter),"my feed").commit();
-                mSwipeRefreshLayout.setRefreshing(false);
+                if (AlarmSQLHelper.getInstance(this).getFavoriteTopics().size()==0){
+                    getLatestNews(0);
+                    mDrawerLayout.closeDrawer(GravityCompat.START);
+                    getSupportActionBar().setTitle("Latest");
+                    sharedPreferences.edit().putString(getString(R.string.current_filter),"latest").commit();
+                    mSwipeRefreshLayout.setRefreshing(false);
+                    Toast.makeText(this, "You have no favorite topic selected", Toast.LENGTH_SHORT).show();
+                }else {
+                    getMyFeed(0);
+                    mDrawerLayout.closeDrawer(GravityCompat.START);
+                    getSupportActionBar().setTitle("My Feed");
+                    sharedPreferences.edit().putString(getString(R.string.current_filter), "my feed").commit();
+                    mSwipeRefreshLayout.setRefreshing(false);
+                }
                 return true;
 
             //Else grab the news according to the topic selected
@@ -434,7 +443,7 @@ public class MainActivity extends AppCompatActivity
      * Get the latest feed according to your topic list in favorite
      * @param page next page to load
      */
-    public void getMyFeed(int page){
+    private void getMyFeed(int page){
         final List<TopicObject> favoriteTopics = AlarmSQLHelper.getInstance(this).getFavoriteTopics();
         final Map<String, List<Item>> myFeedMap = new HashMap<>();
         final List<Item> myFeedArticles = new LinkedList<>();
@@ -496,7 +505,7 @@ public class MainActivity extends AppCompatActivity
      * Helper method for endless scroll
      * @param page next page to load
      */
-    public void addMyFeed(int page){
+    private void addMyFeed(int page){
         final List<TopicObject> favoriteTopics = AlarmSQLHelper.getInstance(this).getFavoriteTopics();
         final Map<String, List<Item>> myFeedMap = new HashMap<>();
         final List<Item> myFeedArticles = new LinkedList<>();
@@ -550,11 +559,12 @@ public class MainActivity extends AppCompatActivity
         }
     }
 
-    public boolean isFragmentVisible(){
-        // TODO: 12/6/16 Uncomment the statement
+    /**
+     * mStack is used to track if a fragment is on top
+     * @return if A fragment is on top of the place holder fragment
+     */
+    private boolean isFragmentVisible(){
         Fragment placeHolderFragment = getSupportFragmentManager().findFragmentByTag(getString(R.string.place_holder_fragment));
-        Fragment settingFragment = getSupportFragmentManager().findFragmentByTag(getString(R.string.setting_fragment));
-        Fragment detailFragment = getSupportFragmentManager().findFragmentByTag(getString(R.string.detail_fragment));
         if (placeHolderFragment.isVisible()) {
             mStack++;
             return false;
