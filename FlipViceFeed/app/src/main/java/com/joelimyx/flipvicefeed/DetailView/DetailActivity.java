@@ -32,6 +32,7 @@ import com.joelimyx.flipvicefeed.detailview.articleobjectdata.ArticleObject;
 import com.joelimyx.flipvicefeed.detailview.articleobjectdata.Image;
 import com.joelimyx.flipvicefeed.detailview.articleobjectdata.PhotoCredit;
 import com.joelimyx.flipvicefeed.detailview.articleobjectdata.Text;
+import com.joelimyx.flipvicefeed.detailview.articleobjectdata.TextStrong;
 import com.joelimyx.flipvicefeed.detailview.articleobjectdata.Video;
 import com.joelimyx.flipvicefeed.detailview.individualarticledata.Article;
 import com.joelimyx.flipvicefeed.detailview.individualarticledata.ArticleData;
@@ -195,6 +196,10 @@ public class DetailActivity extends AppCompatActivity {
                         String photoCredit = e.text();
                         PhotoCredit credit = new PhotoCredit(photoCredit);
                         fullList.add(credit);
+                    }else if (e.html().startsWith("<strong>") && e.html().endsWith("</strong>")) {
+                        TextStrong text = new TextStrong(e.text());
+                        fullList.add(text);
+                        Log.d(TAG, "getDataFromHTML: STRONG TEXT ADDED---- " +fullList.size());
                     }else {
 
                         Text text = new Text(e.text());  //CREATES NEW Text OBJECT
@@ -232,7 +237,9 @@ public class DetailActivity extends AppCompatActivity {
 
                         Image image  = new Image(ahrefLink);
                         fullList.add(image);
-                    }else if (!e.html().contains("<p href")){
+                        Log.d(TAG, "getDataFromHTML: ADDED IMAGE---- " + fullList.size());
+
+                    }else if (!e.html().contains("<p href") && !e.html().contains("<o:p>")){
 
                         String photoHTML = null;
                         String photoLink = e.html();
@@ -262,17 +269,32 @@ public class DetailActivity extends AppCompatActivity {
         for (Element e: iframeList){
             Log.d(TAG, "getDataFromHTML: ****iframeHTML***  " + e.html());
             String iframeHTML = e.html();
-            int indexStart = iframeHTML.indexOf("http");
-            int indexEnd = iframeHTML.indexOf("\" ");
-            String iframeLink = iframeHTML.substring(indexStart,indexEnd);
 
-            Log.d(TAG, "getDataFromHTML: ***iframeStartIndex***  " + indexStart);
-            Log.d(TAG, "getDataFromHTML: ***iframeEndIndex***  " + indexEnd);
-            Log.d(TAG, "getDataFromHTML: ***iframeLINK***  " + iframeLink);
+            if (!iframeHTML.contains("http")) {
+                int indexStart = iframeHTML.indexOf("www");
+                int indexEnd = iframeHTML.indexOf("\" ");
+                String httpLessLink = iframeHTML.substring(indexStart, indexEnd);
+                Log.d(TAG, "getDataFromHTML: gathered link that has no https-- " +httpLessLink);
 
-            Video video = new Video(iframeHTML);
+                String link = "https://" + httpLessLink;
+                Log.d(TAG, "getDataFromHTML: adds https:// ---- " +link);
 
-            fullList.add(video);
+                Video video = new Video(iframeHTML);
+
+                fullList.add(video);
+            } else {
+                int indexStart = iframeHTML.indexOf("http");
+                int indexEnd = iframeHTML.indexOf("\" ");
+                String iframeLink = iframeHTML.substring(indexStart, indexEnd);
+
+                Log.d(TAG, "getDataFromHTML: ***iframeStartIndex***  " + indexStart);
+                Log.d(TAG, "getDataFromHTML: ***iframeEndIndex***  " + indexEnd);
+                Log.d(TAG, "getDataFromHTML: ***iframeLINK***  " + iframeLink);
+
+                Video video = new Video(iframeHTML);
+
+                fullList.add(video);
+            }
         }
 
 

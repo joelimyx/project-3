@@ -1,6 +1,7 @@
 package com.joelimyx.flipvicefeed.detailview;
 
 import android.content.Context;
+import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
@@ -18,6 +19,13 @@ import com.android.volley.Request;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
+import com.facebook.CallbackManager;
+import com.facebook.FacebookCallback;
+import com.facebook.FacebookException;
+import com.facebook.share.Sharer;
+import com.facebook.share.model.ShareLinkContent;
+import com.facebook.share.widget.ShareButton;
+import com.facebook.share.widget.ShareDialog;
 import com.google.gson.Gson;
 import com.joelimyx.flipvicefeed.R;
 import com.joelimyx.flipvicefeed.classes.VolleySingleton;
@@ -26,10 +34,13 @@ import com.joelimyx.flipvicefeed.detailview.articleobjectdata.ArticleObject;
 import com.joelimyx.flipvicefeed.detailview.articleobjectdata.Image;
 import com.joelimyx.flipvicefeed.detailview.articleobjectdata.PhotoCredit;
 import com.joelimyx.flipvicefeed.detailview.articleobjectdata.Text;
+import com.joelimyx.flipvicefeed.detailview.articleobjectdata.TextStrong;
 import com.joelimyx.flipvicefeed.detailview.articleobjectdata.Video;
 import com.joelimyx.flipvicefeed.detailview.individualarticledata.Article;
 import com.joelimyx.flipvicefeed.detailview.individualarticledata.ArticleData;
 import com.joelimyx.flipvicefeed.detailview.individualarticledata.Example;
+import com.joelimyx.flipvicefeed.main.data.ShareGsonRootObject;
+import com.joelimyx.flipvicefeed.main.data.ShareItem;
 
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Element;
@@ -52,6 +63,11 @@ public class DetailFragment extends Fragment {
     List<ArticleObject> mListOfObjectsInArticle;
     ArticleInfoAdapter mAdapter;
     TextView mTitle;
+    CallbackManager mCallbackManager;
+    ShareDialog mShareDialog;
+    ShareButton mShareButton;
+
+
 
 
     public DetailFragment() {
@@ -95,11 +111,32 @@ public class DetailFragment extends Fragment {
 
         mVolleySingleton = VolleySingleton.getInstance(getContext());
 
+        mShareButton = (ShareButton)view.findViewById(R.id.fragment_fb_share_button);
 
         StringBuilder builder = new StringBuilder();
         String articleID = builder.append(mArticleID).toString();
 
         getArticleByID(articleID);
+        getDataForShare(mArticleID);
+
+        mCallbackManager = CallbackManager.Factory.create();
+        mShareDialog = new ShareDialog(getActivity());
+        mShareDialog.registerCallback(mCallbackManager, new FacebookCallback<Sharer.Result>() {
+            @Override
+            public void onSuccess(Sharer.Result result) {
+                Toast.makeText(getContext(), "Article Shared!", Toast.LENGTH_SHORT).show();
+            }
+
+            @Override
+            public void onCancel() {
+                Toast.makeText(getContext(), "Canceled", Toast.LENGTH_SHORT).show();
+            }
+
+            @Override
+            public void onError(FacebookException error) {
+                Toast.makeText(getContext(), "Error Sharing", Toast.LENGTH_SHORT).show();
+            }
+        });
 
 
     }
@@ -159,10 +196,12 @@ public class DetailFragment extends Fragment {
                         PhotoCredit credit = new PhotoCredit(photoCredit);
                         fullList.add(credit);
                         Log.d(TAG, "getDataFromHTML: ADDED PHOTO CREDIT---- " + fullList.size());
-                    }else {
-
+                    }else if (e.html().startsWith("<strong>") && e.html().endsWith("</strong>")) {
+                        TextStrong text = new TextStrong(e.text());
+                        fullList.add(text);
+                        Log.d(TAG, "getDataFromHTML: STRONG TEXT ADDED---- " +fullList.size());
+                    }else{
                         Text text = new Text(e.text());
-
                         fullList.add(text);
                         Log.d(TAG, "getDataFromHTML: ADDED TEXT---- " +fullList.size());
                     }
@@ -186,16 +225,18 @@ public class DetailFragment extends Fragment {
                 if (!e.html().contains("<iframe") && !e.html().contains("<br>")) {
 
                     if (e.html().contains("<a href")){
-                        String ahref = e.html();
-                        int indexStart = ahref.indexOf("http");
-                        int indexEnd = ahref.indexOf("\"><");
-                        String ahrefLink = ahref.substring(indexStart,indexEnd);
-                        Log.d(TAG, "getDataFromHTML: A HREF HTML--- " + ahref);
 
-                        Image image  = new Image(ahrefLink);
-                        fullList.add(image);
-                        Log.d(TAG, "getDataFromHTML: ADDED IMAGE---- " +fullList.size());
-                    }else if (!e.html().contains("<p href")){
+                            String ahref = e.html();
+                            int indexStart = ahref.indexOf("http");
+                            int indexEnd = ahref.indexOf("\">");
+                            String ahrefLink = ahref.substring(indexStart, indexEnd);
+                            Log.d(TAG, "getDataFromHTML: A HREF HTML--- " + ahref);
+
+                            Image image = new Image(ahrefLink);
+                            fullList.add(image);
+                            Log.d(TAG, "getDataFromHTML: ADDED IMAGE---- " + fullList.size());
+
+                    }else if (!e.html().contains("<p href") && !e.html().contains("<o:p>") && !e.html().contains("<i>")){
 
                         String photoHTML = null;
                         String photoLink = e.html();
@@ -206,11 +247,12 @@ public class DetailFragment extends Fragment {
                         Image image = new Image(photoHTML);
 
                         fullList.add(image);
-                        Log.d(TAG, "getDataFromHTML: ADDED IMAGE---- " +fullList.size());
 
                         Log.d(TAG, "getDataFromHTML: IMAGE HTML: " + photoHTML);
                         Log.d(TAG, "getDataFromHTML: INDEX OF http: " + indexStart);
                         Log.d(TAG, "getDataFromHTML: INDEX OF \" : " );
+                        Log.d(TAG, "getDataFromHTML: ADDED IMAGE---- " +fullList.size());
+
                     }
                 }
             }
@@ -219,21 +261,37 @@ public class DetailFragment extends Fragment {
         }
 
         Elements iframeList = doc.select("div");
-        for (Element e: iframeList){
+        for (Element e: iframeList) {
             Log.d(TAG, "getDataFromHTML: ****iframeHTML***  " + e.html());
             String iframeHTML = e.html();
-            int indexStart = iframeHTML.indexOf("http");
-            int indexEnd = iframeHTML.indexOf("\" ");
-            String iframeLink = iframeHTML.substring(indexStart,indexEnd);
 
-            Log.d(TAG, "getDataFromHTML: ***iframeStartIndex***  " + indexStart);
-            Log.d(TAG, "getDataFromHTML: ***iframeEndIndex***  " + indexEnd);
-            Log.d(TAG, "getDataFromHTML: ***iframeLINK***  " + iframeLink);
+            if (!iframeHTML.contains("http")) {
+                int indexStart = iframeHTML.indexOf("www");
+                int indexEnd = iframeHTML.indexOf("\" ");
+                String httpLessLink = iframeHTML.substring(indexStart, indexEnd);
+                Log.d(TAG, "getDataFromHTML: gathered link that has no https-- " +httpLessLink);
 
-            Video video = new Video(iframeHTML);
+                String link = "https://" + httpLessLink;
+                Log.d(TAG, "getDataFromHTML: adds https:// ---- " +link);
 
-            fullList.add(video);
-            Log.d(TAG, "getDataFromHTML: ADDED VIDEO---- " + fullList.size());
+                Video video = new Video(iframeHTML);
+
+                fullList.add(video);
+            } else {
+
+                int indexStart = iframeHTML.indexOf("http");
+                int indexEnd = iframeHTML.indexOf("\" ");
+                String iframeLink = iframeHTML.substring(indexStart, indexEnd);
+
+                Log.d(TAG, "getDataFromHTML: ***iframeStartIndex***  " + indexStart);
+                Log.d(TAG, "getDataFromHTML: ***iframeEndIndex***  " + indexEnd);
+                Log.d(TAG, "getDataFromHTML: ***iframeLINK***  " + iframeLink);
+
+                Video video = new Video(iframeHTML);
+
+                fullList.add(video);
+                Log.d(TAG, "getDataFromHTML: ADDED VIDEO---- " + fullList.size());
+            }
         }
 
         //TESTING THIS BLOCK OF TO GET OTHER HYPERLINKS IF WE DECIDE TO USE THEM
@@ -252,6 +310,46 @@ public class DetailFragment extends Fragment {
     }
 
 
+
+    public void getDataForShare(Integer id){
+        String url = "http://www.vice.com/api/article/"+id;
+        StringRequest request = new StringRequest(Request.Method.GET, url,
+                new Response.Listener<String>() {
+                    @Override
+                    public void onResponse(String response) {
+                        ShareGsonRootObject shareGsonRoot = new Gson().fromJson(response,ShareGsonRootObject.class);
+                        ShareItem item = shareGsonRoot.getData().getArticle();
+                        shareThisToFacebook(item.getTitle(),
+                                Uri.parse(item.getThumb()),
+                                Uri.parse(item.getUrl()));
+                    }
+                },
+                new Response.ErrorListener() {
+                    @Override
+                    public void onErrorResponse(VolleyError error) {
+                        Toast.makeText(getContext(), "Error when attempting to share.", Toast.LENGTH_SHORT).show();
+                    }
+                });
+        VolleySingleton.getInstance(getContext()).addToRequestQueue(request);
+    }
+
+    public void shareThisToFacebook(String title, Uri imageUrl, Uri linkUrl){
+
+
+        final ShareLinkContent fbShare = new ShareLinkContent.Builder()
+                .setContentTitle(title)
+                .setImageUrl(imageUrl)
+                .setContentUrl(linkUrl)
+                .build();
+
+        mShareButton.setShareContent(fbShare);
+    }
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        mCallbackManager.onActivityResult(requestCode,resultCode,data);
+    }
 
 
 
