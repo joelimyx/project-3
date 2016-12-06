@@ -77,6 +77,7 @@ public class MainActivity extends AppCompatActivity
     private static final String TAG = "MainActivity";
     public static final String SPLASH_BOOLEAN = "first";
     private int mStack = 0;
+    public static final int WELCOME_REQUEST = 1;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -103,7 +104,7 @@ public class MainActivity extends AppCompatActivity
                 .getBoolean(SPLASH_BOOLEAN, true);
 
         if (isFirstRun) {
-            startActivity(new Intent(MainActivity.this, WelcomeActivity.class));
+            startActivityForResult(new Intent(MainActivity.this, WelcomeActivity.class),WELCOME_REQUEST);
         }
 
         getSharedPreferences("PREFERENCE", MODE_PRIVATE).edit()
@@ -357,6 +358,23 @@ public class MainActivity extends AppCompatActivity
         mSwipeRefreshLayout.setRefreshing(false);
     }
 
+    /*---------------------------------------------------------------------------------
+    //On Activity Result
+    ---------------------------------------------------------------------------------*/
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if (requestCode == WELCOME_REQUEST){
+            if (resultCode == RESULT_OK){
+                if (data.getIntExtra(getString(R.string.favorite_size),-1) >0 ){
+                    getMyFeed(0);
+                    SharedPreferences sharedPreferences = getSharedPreferences(getString(R.string.preference_current_filter),MODE_PRIVATE);
+                    sharedPreferences.edit().putString(getString(R.string.current_filter),"my feed").commit();
+                    getSupportActionBar().setTitle("My Feed");
+                }
+            }
+        }
+    }
     /*---------------------------------------------------------------------------------
     // Helper Method AREA
     ---------------------------------------------------------------------------------*/

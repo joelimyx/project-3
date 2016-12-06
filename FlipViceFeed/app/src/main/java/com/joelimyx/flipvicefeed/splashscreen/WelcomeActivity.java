@@ -31,10 +31,5 @@ public class WelcomeActivity extends AppCompatActivity
         vp.setCurrentItem(2);
     }
 
-//    @Override
-//    public void finishWelcomeActivity() {
-//        finish();
-//    }
-
 
 }
