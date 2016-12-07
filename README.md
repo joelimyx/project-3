@@ -58,7 +58,7 @@ When you set up for notification, the app will notify you with with new articles
 
 You can also easily share this article to Facebook with just a click of a button.
 <p align ="center">
-<img src= "screenshot/facebookshare.png" height="300px"/>
+<img src= "Screenshot/facebookshare.png" height="300px"/>
 </p>
 
 ## Other features:
