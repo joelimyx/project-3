@@ -1,6 +1,7 @@
 package com.joelimyx.flipvicefeed.main.main;
 
 import android.content.Context;
+import android.content.Intent;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -21,8 +22,10 @@ import com.joelimyx.flipvicefeed.R;
 import com.joelimyx.flipvicefeed.classes.GsonArticle;
 import com.joelimyx.flipvicefeed.classes.Item;
 import com.joelimyx.flipvicefeed.classes.VolleySingleton;
+import com.joelimyx.flipvicefeed.search.SearchActivity;
 import com.squareup.picasso.Picasso;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -35,7 +38,7 @@ public class MainAdapter extends RecyclerView.Adapter<MainAdapter.MainViewHolder
     private Context mContext;
     private int lastPosition = -1;
 
-    interface OnItemSelectedListener{
+    public interface OnItemSelectedListener{
         void onItemSelected(int id, View view);
     }
 
@@ -112,7 +115,13 @@ public class MainAdapter extends RecyclerView.Adapter<MainAdapter.MainViewHolder
         notifyItemRangeInserted(start,addedItems.size());
     }
 
-    private void animateRecyclerView(View viewToAnimate,int position){
+    public void addQueriedData(List<Item> addedTags) {
+        mArticleList.clear();
+        mArticleList.addAll(addedTags);
+        notifyDataSetChanged();
+    }
+
+    private void animateRecyclerView(View viewToAnimate, int position) {
         if (position > lastPosition) {
             Animation animation = AnimationUtils.loadAnimation(mContext, R.anim.list_item_main_animation);
             viewToAnimate.startAnimation(animation);
@@ -120,10 +129,27 @@ public class MainAdapter extends RecyclerView.Adapter<MainAdapter.MainViewHolder
         }
     }
 
+    public void showSearchResults(String query) {
+        ArrayList<Item> matchingList = new ArrayList<>();
+        for (int i = 0; i < mArticleList.size(); i++) {
+            for (String tag:mArticleList.get(i).getTags()) {
+                if (tag.toLowerCase().equals(query.toLowerCase())){
+                    matchingList.add(mArticleList.get(i));
+                }
+
+            }
+        }
+        if (!matchingList.isEmpty()) {
+            Intent intent = new Intent(mContext, SearchActivity.class);
+            intent.putParcelableArrayListExtra(SearchActivity.SEARCH_KEY, matchingList);
+            mContext.startActivity(intent);
+        }
+    }
+
     /*---------------------------------------------------------------------------------
     // Main View Holder
     ---------------------------------------------------------------------------------*/
-    class MainViewHolder extends RecyclerView.ViewHolder{
+    class MainViewHolder extends RecyclerView.ViewHolder {
         private TextView mTitleText;
         private ImageView mArticleImage;
         private FrameLayout mArticleItemLayout;

@@ -1,0 +1,28 @@
+User Stories 
+
+Feature - Can read articles from Vice.com by latest, by topic, and also create/view by my favorites.
+	As a user, I can get the latest articles from Vice.com on the Home Screen
+	As a user, I can select a topic from the Navigation Menu and view all articles in that topic on the Home Screen
+	As a user, I can select my favorite topics from the Filter Settings and add them to my favorites
+	As a user, I can choose to see my favorite topics all together on the Home Screen
+
+Feature - Can select and read an article easily
+	As a user on a smaller device, I can chose which article I want to read from the Home Screen and view it on the Detail Screen
+	As a user on a larger device, I can view the list of articles from the Home Screen on the left side of the screen while also being able to view the Detail Screen on the right at the same time
+
+Feature - Can share an article on Facebook
+	As a user, I can share an article by clicking the 'Facebook Share' button shown on the Detail Screen
+	As a user, after clicking the share button, I can login to my Facebook, write a title/description for my post, and send the post to my wall
+
+Feature - Can be used in either Portrait or Landscape 
+	As a user, I can use the app on my phone in either Portrait or Landscape mode
+	As a user, I can use the app on my tablet in either Portrait or Landscape mode
+
+Feature - Can receive Notifications when the user wants them
+	As a user, at first launch of the app, I can set what days of the week and what times I prefer read the news
+	As a user, my Notifications will arrive on my phone when I prefer read the news
+	As a user, I can edit my Notification Settings and change my preferred news reading times or turn them off as a whole
+
+Feature - Can search Vice.com articles by tag
+	As a user, I can use the search bar to search for articles
+	As a user, I can search for articles by 'tag'
