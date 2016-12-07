@@ -1,16 +1,15 @@
 package com.joelimyx.flipvicefeed.main.main;
 
-import android.app.Activity;
-import android.app.ActivityOptions;
 import android.content.Context;
 import android.content.Intent;
-import android.os.Build;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
+import android.widget.Filter;
+import android.widget.Filterable;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -21,14 +20,14 @@ import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
 import com.google.gson.Gson;
-import com.joelimyx.flipvicefeed.detailview.DetailActivity;
 import com.joelimyx.flipvicefeed.R;
 import com.joelimyx.flipvicefeed.classes.GsonArticle;
 import com.joelimyx.flipvicefeed.classes.Item;
 import com.joelimyx.flipvicefeed.classes.VolleySingleton;
+import com.joelimyx.flipvicefeed.search.SearchActivity;
 import com.squareup.picasso.Picasso;
 
-import java.nio.channels.ScatteringByteChannel;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -41,7 +40,7 @@ public class MainAdapter extends RecyclerView.Adapter<MainAdapter.MainViewHolder
     private Context mContext;
     private int lastPosition = -1;
 
-    interface OnItemSelectedListener{
+    public interface OnItemSelectedListener {
         void onItemSelected(int id, View view);
     }
 
@@ -55,7 +54,7 @@ public class MainAdapter extends RecyclerView.Adapter<MainAdapter.MainViewHolder
     public MainViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         return new MainViewHolder(
                 LayoutInflater.from(parent.getContext())
-                        .inflate(R.layout.list_item_article,parent,false));
+                        .inflate(R.layout.list_item_article, parent, false));
     }
 
     @Override
@@ -71,10 +70,10 @@ public class MainAdapter extends RecyclerView.Adapter<MainAdapter.MainViewHolder
         holder.mArticleItemLayout.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                mListener.onItemSelected(mArticleList.get(position).getId(),holder.mArticleImage);
+                mListener.onItemSelected(mArticleList.get(position).getId(), holder.mArticleImage);
             }
         });
-        animateRecyclerView(holder.mArticleItemLayout,position);
+        animateRecyclerView(holder.mArticleItemLayout, position);
     }
 
     @Override
@@ -85,8 +84,8 @@ public class MainAdapter extends RecyclerView.Adapter<MainAdapter.MainViewHolder
     /*---------------------------------------------------------------------------------
     // Helper Method
     ---------------------------------------------------------------------------------*/
-    public void swapData(String path){
-        String url = "http://vice.com/api/getlatest/category/"+path;
+    public void swapData(String path) {
+        String url = "http://vice.com/api/getlatest/category/" + path;
         mArticleList.clear();
 
         StringRequest request = new StringRequest(Request.Method.GET, url,
@@ -95,7 +94,7 @@ public class MainAdapter extends RecyclerView.Adapter<MainAdapter.MainViewHolder
                     public void onResponse(String response) {
 
                         //Extracting data
-                        GsonArticle gsonArticle = new Gson().fromJson(response,GsonArticle.class);
+                        GsonArticle gsonArticle = new Gson().fromJson(response, GsonArticle.class);
                         List<Item> items = gsonArticle.getData().getItems();
 
                         //Setup up adapter to recycler view
@@ -112,13 +111,19 @@ public class MainAdapter extends RecyclerView.Adapter<MainAdapter.MainViewHolder
         VolleySingleton.getInstance(mContext).addToRequestQueue(request);
     }
 
-    public void addData(List<Item> addedItems){
+    public void addData(List<Item> addedItems) {
         int start = getItemCount();
         mArticleList.addAll(addedItems);
-        notifyItemRangeInserted(start,addedItems.size());
+        notifyItemRangeInserted(start, addedItems.size());
     }
 
-    private void animateRecyclerView(View viewToAnimate,int position){
+    public void addQueriedData(List<Item> addedTags) {
+        mArticleList.clear();
+        mArticleList.addAll(addedTags);
+        notifyDataSetChanged();
+    }
+
+    private void animateRecyclerView(View viewToAnimate, int position) {
         if (position > lastPosition) {
             Animation animation = AnimationUtils.loadAnimation(mContext, R.anim.list_item_main_animation);
             viewToAnimate.startAnimation(animation);
@@ -126,10 +131,30 @@ public class MainAdapter extends RecyclerView.Adapter<MainAdapter.MainViewHolder
         }
     }
 
+    public void showSearchResults(String query) {
+        ArrayList<Item> matchingList = new ArrayList<>();
+        for (int i = 0; i < mArticleList.size(); i++) {
+            for (String tag:mArticleList.get(i).getTags()) {
+                if (tag.toLowerCase().equals(query.toLowerCase())){
+                    matchingList.add(mArticleList.get(i));
+                }
+
+            }
+//            if (mArticleList.get(i).getTags().contains(query)) {
+//                matchingList.add(mArticleList.get(i));
+//            }
+        }
+        if (!matchingList.isEmpty()) {
+            Intent intent = new Intent(mContext, SearchActivity.class);
+            intent.putParcelableArrayListExtra(SearchActivity.SEARCH_KEY, matchingList);
+            mContext.startActivity(intent);
+        }
+    }
+
     /*---------------------------------------------------------------------------------
     // Main View Holder
     ---------------------------------------------------------------------------------*/
-    class MainViewHolder extends RecyclerView.ViewHolder{
+    class MainViewHolder extends RecyclerView.ViewHolder {
         private TextView mTitleText;
         private ImageView mArticleImage;
         private FrameLayout mArticleItemLayout;
