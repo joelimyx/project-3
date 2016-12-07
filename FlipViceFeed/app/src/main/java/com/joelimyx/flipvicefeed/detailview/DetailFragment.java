@@ -52,7 +52,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 
-public class gDetailFragment extends Fragment {
+public class DetailFragment extends Fragment {
     // TODO: Rename parameter arguments, choose names that match
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
     private static final String ARTICLE_ID = "param1";

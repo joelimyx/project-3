@@ -28,6 +28,8 @@ import android.support.v7.widget.Toolbar;
 import android.transition.ChangeImageTransform;
 import android.transition.Fade;
 import android.util.Log;
+import android.util.Pair;
+import android.util.Log;
 import android.util.Log;
 import android.util.Pair;
 import android.view.Menu;
@@ -119,7 +121,7 @@ public class MainActivity extends AppCompatActivity
         /*---------------------------------------------------------------------------------
         // Animation AREA
         ---------------------------------------------------------------------------------*/
-        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.LOLLIPOP) {
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.LOLLIPOP){
             //Activity Transition
             android.transition.TransitionSet activityTransition = new android.transition.TransitionSet();
             activityTransition.addTransition(new Fade());
@@ -134,13 +136,13 @@ public class MainActivity extends AppCompatActivity
         }
 
         //Reference
-        if (findViewById(R.id.fragment_container) != null) {
+        if (findViewById(R.id.fragment_container) != null){
             mTwoPane = true;
-        } else {
+        }else {
             mTwoPane = false;
         }
 
-        mTwoPane = findViewById(R.id.fragment_container) != null;
+        mTwoPane = findViewById(R.id.fragment_container)!=null;
         mSwipeRefreshLayout = (SwipeRefreshLayout) findViewById(R.id.swipe_refresh);
         mVolleySingleton = VolleySingleton.getInstance(this);
 
@@ -152,6 +154,7 @@ public class MainActivity extends AppCompatActivity
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         getSupportActionBar().setDefaultDisplayHomeAsUpEnabled(true);
+        getSupportActionBar().setTitle("Latest");
 
         //RecyclerView
         mMainRecyclerView = (RecyclerView) findViewById(R.id.main_recyclerview);
@@ -485,7 +488,8 @@ public class MainActivity extends AppCompatActivity
                         Toast.makeText(getApplicationContext(), "Error getting articles", Toast.LENGTH_SHORT).show();
                     }
                 });
-        mVolleySingleton.addToRequestQueue(request);}
+        mVolleySingleton.addToRequestQueue(request);
+    }
 
     /**
      * Get the latest feed according to your topic list in favorite
@@ -628,8 +632,8 @@ public class MainActivity extends AppCompatActivity
     }
 
     /*---------------------------------------------------------------------------------
-        // Network State AREA
-        ---------------------------------------------------------------------------------*/
+    // Network State AREA
+    ---------------------------------------------------------------------------------*/
     //Network State Listener to show or dismiss snackbar
     public static class NetworkStateReceiver extends BroadcastReceiver {
 
