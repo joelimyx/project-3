@@ -71,7 +71,7 @@ You can also easily share this article to Facebook with just a click of a button
 </p>
 
 ## Other features:
-
+- Search by tags
 - Video Playback
 - Swipe down to refresh
 - Auto scroll to top
