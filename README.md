@@ -9,7 +9,8 @@ VooZ is a simple to use news app that utilizes Vice API to create a visually app
 ## Features
 ### Welcome Page
 The first time you open your app, you are greeted with a welcome page that will guide you through setting up the app for the best experience possible.
-<p align ="center"> <img src= "screenshot/welcome1.png" height="300px"/>
+<p align ="center">
+<img src= "screenshot/welcome1.png" height="300px"/>
  <img src= "screenshot/welcome2.png" height="300px"/>
  <img src= "screenshot/welcome3.png" height="300px"/></p>
 
