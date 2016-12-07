@@ -79,3 +79,7 @@ You can also easily share this article to Facebook with just a click of a button
 - Network Change Notification
 - Animation
 - Endless Scroll
+
+---
+### Trello
+[Trello](https://trello.com/b/PLbQ8MBX)
