@@ -11,7 +11,7 @@ Before we started creating the app, we did an extensive research on our user bas
 
 In our [interviews](/Research:Planning/Interviews.txt) that we've conducted, we can safely conclude that our users has many similarities with [the user persona of Bob](/Research:Planning/Bob.jpg). They are generally in the 30's who are mostly male with left leaning political view.
 
-Afterward, we did some [research on our competitors](/Research:Planning/Competitor Research.pdf) and found that our major competitors are the guardian, FlipBoard, Buzzfeed and Huffington Post. Most of the the articles that they push out doesn't have too much content or the image to text ratio are out of proportion. Most of our competitors doesn't allow users to customize their news feed to their own needs. And worst of all, they all contains ads, which for most users are annoying.
+Afterward, we did some [research on our competitors](/Research:Planning/Competitor Research - Sheet1.pdf) and found that our major competitors are the guardian, FlipBoard, Buzzfeed and Huffington Post. Most of the the articles that they push out doesn't have too much content or the image to text ratio are out of proportion. Most of our competitors doesn't allow users to customize their news feed to their own needs. And worst of all, they all contains ads, which for most users are annoying.
 
 After concluding our research, we come up with the following features that tailors to our users.
 
@@ -71,7 +71,7 @@ You can also easily share this article to Facebook with just a click of a button
 </p>
 
 ## Other features:
-
+- Search by tags
 - Video Playback
 - Swipe down to refresh
 - Auto scroll to top
