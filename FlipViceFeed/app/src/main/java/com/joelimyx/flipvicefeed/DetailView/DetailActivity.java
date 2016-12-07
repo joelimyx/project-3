@@ -218,24 +218,43 @@ public class DetailActivity extends AppCompatActivity {
                         TextStrong text = new TextStrong(e.text());
                         fullList.add(text);
                         Log.d(TAG, "getDataFromHTML: STRONG TEXT ADDED---- " +fullList.size());
+                    }else if (e.html().contains("<iframe")) {
+                        Video video = new Video(e.html());
+                        fullList.add(video);
+                        Log.d(TAG, "getDataFromHTML: VIDEO ADDED----*" + fullList.size());
                     }else {
-
                         Text text = new Text(e.text());  //CREATES NEW Text OBJECT
-
                         fullList.add(text);   //ADDS TO LIST
                     }
                 }else {  //IF HTML HAS BOTH IMAGE AND PHOTO CREDIT TEXT IT LOCATES AND SEPARATES
-                    String imgSrc = e.html();
-                    int indexStart = imgSrc.indexOf("http");
-                    int indexEnd = imgSrc.indexOf("\" ");
-                    String imgLink = imgSrc.substring(indexStart,indexEnd);
+                    if (e.html().contains("<img src") && e.html().endsWith("alt=\"\">")){
+                        String imgSrc = e.html();
+                        int indexStart = imgSrc.indexOf("http");
+                        int indexEnd = imgSrc.indexOf("\" alt=\"\">");
 
-                    Image image = new Image(imgLink);
-                    fullList.add(image);
+                        Text text = new Text(e.text());
+                        fullList.add(text);
+                        Log.d(TAG, "getDataFromHTML: ADDED TEXT----* " +fullList.size());
 
-                    String photoCredit = e.text();
-                    PhotoCredit credit = new PhotoCredit(photoCredit);
-                    fullList.add(credit);
+                        String imageHtml = imgSrc.substring(indexStart,indexEnd);
+                        Image image = new Image(imageHtml);
+                        fullList.add(image);
+                        Log.d(TAG, "getDataFromHTML: ADDED IMAGE----* " + imageHtml);
+
+
+                    }else {
+                        String imgSrc = e.html();
+                        int indexStart = imgSrc.indexOf("http");
+                        int indexEnd = imgSrc.indexOf("\" ");
+                        String imgLink = imgSrc.substring(indexStart, indexEnd);
+
+                        Image image = new Image(imgLink);
+                        fullList.add(image);
+
+                        String photoCredit = e.text();
+                        PhotoCredit credit = new PhotoCredit(photoCredit);
+                        fullList.add(credit);
+                    }
                 }
 
                 //CHECKS FOR EMPTY .text(), AND A POPULATED .html() WHICH SHOWS OTHER CONTENT(IMGS,VIDEOS) ON SCREEN
@@ -257,7 +276,7 @@ public class DetailActivity extends AppCompatActivity {
                         fullList.add(image);
                         Log.d(TAG, "getDataFromHTML: ADDED IMAGE---- " + fullList.size());
 
-                    }else if (!e.html().contains("<p href") && !e.html().contains("<o:p>")){
+                    }else if (!e.html().contains("<p href") && !e.html().contains("<o:p>") && !e.html().contains("<i>")){
 
                         String photoHTML = null;
                         String photoLink = e.html();

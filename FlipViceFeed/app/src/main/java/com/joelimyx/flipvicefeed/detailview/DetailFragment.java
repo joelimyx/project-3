@@ -219,28 +219,47 @@ public class DetailFragment extends Fragment {
                         TextStrong text = new TextStrong(e.text());
                         fullList.add(text);
                         Log.d(TAG, "getDataFromHTML: STRONG TEXT ADDED---- " +fullList.size());
+                    }else if (e.html().contains("<iframe")) {
+                        Video video = new Video(e.html());
+                        fullList.add(video);
+                        Log.d(TAG, "getDataFromHTML: VIDEO ADDED----*" + fullList.size());
+
                     }else{
                         Text text = new Text(e.text());
                         fullList.add(text);
                         Log.d(TAG, "getDataFromHTML: ADDED TEXT---- " +fullList.size());
                     }
-                }else if (e.html().contains("<img src")) {
-                    Log.d(TAG, "getDataFromHTML: GALLERY IMAGE FOUND --- " + e.html());
-
                 }else {
-                    String imgSrc = e.html();
-                    int indexStart = imgSrc.indexOf("http");
-                    int indexEnd = imgSrc.indexOf("\" ");
-                    String imgLink = imgSrc.substring(indexStart,indexEnd);
+                    if (e.html().contains("<img src") && e.html().endsWith("alt=\"\">")){
+                        String imgSrc = e.html();
+                        int indexStart = imgSrc.indexOf("http");
+                        int indexEnd = imgSrc.indexOf("\" alt=\"\">");
 
-                    Image image = new Image(imgLink);
-                    fullList.add(image);
-                    Log.d(TAG, "getDataFromHTML: ADDED IMAGE---- " +fullList.size());
+                        Text text = new Text(e.text());
+                        fullList.add(text);
+                        Log.d(TAG, "getDataFromHTML: ADDED TEXT----* " +fullList.size());
 
-                    String photoCredit = e.text();
-                    PhotoCredit credit = new PhotoCredit(photoCredit);
-                    fullList.add(credit);
-                    Log.d(TAG, "getDataFromHTML: ADDED PHOTO CREDIT---- " + fullList.size());
+                        String imageHtml = imgSrc.substring(indexStart,indexEnd);
+                        Image image = new Image(imageHtml);
+                        fullList.add(image);
+                        Log.d(TAG, "getDataFromHTML: ADDED IMAGE----* " + imageHtml);
+
+
+                    }else {
+                        String imgSrc = e.html();
+                        int indexStart = imgSrc.indexOf("http");
+                        int indexEnd = imgSrc.indexOf("\" ");
+                        String imgLink = imgSrc.substring(indexStart, indexEnd);
+
+                        Image image = new Image(imgLink);
+                        fullList.add(image);
+                        Log.d(TAG, "getDataFromHTML: ADDED IMAGE---- " + fullList.size());
+
+                        String photoCredit = e.text();
+                        PhotoCredit credit = new PhotoCredit(photoCredit);
+                        fullList.add(credit);
+                        Log.d(TAG, "getDataFromHTML: ADDED PHOTO CREDIT---- " + fullList.size());
+                    }
                 }
             }else if (e.text().equals("") && !e.html().equals("")) {
 
