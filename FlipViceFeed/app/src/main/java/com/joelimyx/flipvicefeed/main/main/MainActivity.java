@@ -26,6 +26,7 @@ import android.support.v7.widget.Toolbar;
 import android.transition.ChangeImageTransform;
 import android.transition.Fade;
 import android.util.Log;
+import android.util.Pair;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -229,7 +230,7 @@ public class MainActivity extends AppCompatActivity
             Intent intent = new Intent(this, DetailActivity.class);
             intent.putExtra("id", id);
             if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.LOLLIPOP) {
-                android.util.Pair<View, String> mainPair = android.util.Pair.create(findViewById(R.id.article_item_image), getString(R.string.main_to_detail));
+                Pair<View, String> mainPair = Pair.create(view.findViewById(R.id.article_item_image), getString(R.string.main_to_detail));
                 mActivityOptions = ActivityOptions.makeSceneTransitionAnimation(MainActivity.this, mainPair);
                 startActivity(intent, mActivityOptions.toBundle());
             } else {
