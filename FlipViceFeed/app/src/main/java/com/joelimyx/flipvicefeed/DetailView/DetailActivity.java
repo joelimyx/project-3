@@ -135,7 +135,7 @@ public class DetailActivity extends AppCompatActivity {
         return false;
     }
 
-    private String getArticleByID(String articleID){
+    public String getArticleByID(String articleID){
         //CREATE URL FOR API CALL
         final String baseURL = "http://www.vice.com/api/article/";
         String fullURL = baseURL + articleID;
@@ -197,7 +197,7 @@ public class DetailActivity extends AppCompatActivity {
         return null;
     }
 
-    private String getDataFromHTML(String html){
+    public String getDataFromHTML(String html){
         //CREATE JSOUP DOCUMENT FROM THE HTML
         org.jsoup.nodes.Document doc = Jsoup.parse(html);
 

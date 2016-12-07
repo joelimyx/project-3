@@ -40,7 +40,7 @@ public class MainAdapter extends RecyclerView.Adapter<MainAdapter.MainViewHolder
     private Context mContext;
     private int lastPosition = -1;
 
-    public interface OnItemSelectedListener {
+    interface OnItemSelectedListener{
         void onItemSelected(int id, View view);
     }
 
@@ -54,7 +54,7 @@ public class MainAdapter extends RecyclerView.Adapter<MainAdapter.MainViewHolder
     public MainViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         return new MainViewHolder(
                 LayoutInflater.from(parent.getContext())
-                        .inflate(R.layout.list_item_article, parent, false));
+                        .inflate(R.layout.list_item_article,parent,false));
     }
 
     @Override
@@ -70,10 +70,10 @@ public class MainAdapter extends RecyclerView.Adapter<MainAdapter.MainViewHolder
         holder.mArticleItemLayout.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                mListener.onItemSelected(mArticleList.get(position).getId(), holder.mArticleImage);
+                mListener.onItemSelected(mArticleList.get(position).getId(),holder.mArticleImage);
             }
         });
-        animateRecyclerView(holder.mArticleItemLayout, position);
+        animateRecyclerView(holder.mArticleItemLayout,position);
     }
 
     @Override
@@ -84,8 +84,8 @@ public class MainAdapter extends RecyclerView.Adapter<MainAdapter.MainViewHolder
     /*---------------------------------------------------------------------------------
     // Helper Method
     ---------------------------------------------------------------------------------*/
-    public void swapData(String path) {
-        String url = "http://vice.com/api/getlatest/category/" + path;
+    public void swapData(String path){
+        String url = "http://vice.com/api/getlatest/category/"+path;
         mArticleList.clear();
 
         StringRequest request = new StringRequest(Request.Method.GET, url,
@@ -94,7 +94,7 @@ public class MainAdapter extends RecyclerView.Adapter<MainAdapter.MainViewHolder
                     public void onResponse(String response) {
 
                         //Extracting data
-                        GsonArticle gsonArticle = new Gson().fromJson(response, GsonArticle.class);
+                        GsonArticle gsonArticle = new Gson().fromJson(response,GsonArticle.class);
                         List<Item> items = gsonArticle.getData().getItems();
 
                         //Setup up adapter to recycler view
@@ -111,10 +111,10 @@ public class MainAdapter extends RecyclerView.Adapter<MainAdapter.MainViewHolder
         VolleySingleton.getInstance(mContext).addToRequestQueue(request);
     }
 
-    public void addData(List<Item> addedItems) {
+    public void addData(List<Item> addedItems){
         int start = getItemCount();
         mArticleList.addAll(addedItems);
-        notifyItemRangeInserted(start, addedItems.size());
+        notifyItemRangeInserted(start,addedItems.size());
     }
 
     public void addQueriedData(List<Item> addedTags) {
@@ -140,9 +140,6 @@ public class MainAdapter extends RecyclerView.Adapter<MainAdapter.MainViewHolder
                 }
 
             }
-//            if (mArticleList.get(i).getTags().contains(query)) {
-//                matchingList.add(mArticleList.get(i));
-//            }
         }
         if (!matchingList.isEmpty()) {
             Intent intent = new Intent(mContext, SearchActivity.class);
