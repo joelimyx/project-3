@@ -485,7 +485,7 @@ public class MainActivity extends AppCompatActivity
                         Toast.makeText(getApplicationContext(), "Error getting articles", Toast.LENGTH_SHORT).show();
                     }
                 });
-        mVolleySingleton.addToRequestQueue(request);
+        mVolleySingleton.addToRequestQueue(request);}
 
     /**
      * Get the latest feed according to your topic list in favorite

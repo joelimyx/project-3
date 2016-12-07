@@ -40,7 +40,7 @@ public class MainAdapter extends RecyclerView.Adapter<MainAdapter.MainViewHolder
     private Context mContext;
     private int lastPosition = -1;
 
-    interface OnItemSelectedListener{
+    public interface OnItemSelectedListener{
         void onItemSelected(int id, View view);
     }
 
