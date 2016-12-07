@@ -1,9 +1,20 @@
 # <img src= "FlipViceFeed/app/src/main/res/drawable/vooziconwithshadow.png" height="40px"/> Welcome to VooZ
 ###### By Yuan Xue Lim, Colin Bradley, Kenny Korb and David Scarimbolo
 
-### Introduction
+## Introduction
 
 VooZ is a simple to use news app that utilizes Vice API to create a visually appealing app. Users can select their topic of interest and VooZ will create a customize the feed to best suit them. VooZ also parses thru the body of the articles, which was represented in html, and extract important informations to be presented in a cleanly formatted article.
+
+---
+## Research and Planning
+
+Before we started creating the app, we did an extensive research on our user base to determine what is the best features to be included into our app.
+
+In our [interviews](Research:Planning/Interviews.txt) that we've conducted, we can safely conclude that our users has many similarities with [the user persona of Bob](Research:Planning/Bob.jpg). They are generally in the 30's who are mostly male with left leaning political view.
+
+Afterward, we did some [research on our competitors](Research:Planning/Competitor Research.pdf) and found that our major competitors are the guardian, FlipBoard, Buzzfeed and Huffington Post. Most of the the articles that they push out doesn't have too much content or the image to text ratio are out of proportion. Most of our competitors doesn't allow users to customize their news feed to their own needs. And worst of all, they all contains ads, which for most users are annoying.
+
+After concluding our research, we come up with the following features that tailors to our users. 
 
 ---
 ## Features
