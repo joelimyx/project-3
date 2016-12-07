@@ -1,9 +1,10 @@
 package com.joelimyx.flipvicefeed.main.main;
 
 import android.app.ActivityOptions;
+import android.content.Intent;
+import android.app.SearchManager;
 import android.content.BroadcastReceiver;
 import android.content.Context;
-import android.content.Intent;
 import android.content.SharedPreferences;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
@@ -22,9 +23,13 @@ import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.SearchView;
 import android.support.v7.widget.Toolbar;
 import android.transition.ChangeImageTransform;
 import android.transition.Fade;
+import android.util.Log;
+import android.util.Pair;
+import android.util.Log;
 import android.util.Log;
 import android.util.Pair;
 import android.view.Menu;
@@ -39,6 +44,8 @@ import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
 import com.facebook.FacebookSdk;
 import com.google.gson.Gson;
+import com.joelimyx.flipvicefeed.classes.Data;
+import com.joelimyx.flipvicefeed.detailview.DetailActivity;
 import com.joelimyx.flipvicefeed.R;
 import com.joelimyx.flipvicefeed.classes.GsonArticle;
 import com.joelimyx.flipvicefeed.classes.Item;
@@ -147,7 +154,7 @@ public class MainActivity extends AppCompatActivity
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         getSupportActionBar().setDefaultDisplayHomeAsUpEnabled(true);
-
+        getSupportActionBar().setTitle("Latest");
 
         //RecyclerView
         mMainRecyclerView = (RecyclerView) findViewById(R.id.main_recyclerview);
@@ -295,7 +302,34 @@ public class MainActivity extends AppCompatActivity
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         MenuInflater inflater = getMenuInflater();
-        inflater.inflate(R.menu.menu, menu);
+        inflater.inflate(R.menu.search_menu, menu);
+
+        SearchManager searchManager = (SearchManager) getSystemService(Context.SEARCH_SERVICE);
+        SearchView searchView = (SearchView) menu.findItem(R.id.search)
+                .getActionView();
+
+        if (null != searchView) {
+            searchView.setSearchableInfo(searchManager
+                    .getSearchableInfo(getComponentName()));
+            searchView.setIconifiedByDefault(false);
+        }
+
+        final SearchView.OnQueryTextListener queryTextListener =
+                new SearchView.OnQueryTextListener() {
+
+                    public boolean onQueryTextChange(String newText) {
+                        return true;
+                    }
+
+                    public boolean onQueryTextSubmit(String query) {
+                        mAdapter.showSearchResults(query);
+                        return true;
+                    }
+                };
+
+        assert searchView != null;
+        searchView.setOnQueryTextListener(queryTextListener);
+
         return super.onCreateOptionsMenu(menu);
     }
 
@@ -598,8 +632,8 @@ public class MainActivity extends AppCompatActivity
     }
 
     /*---------------------------------------------------------------------------------
-        // Network State AREA
-        ---------------------------------------------------------------------------------*/
+    // Network State AREA
+    ---------------------------------------------------------------------------------*/
     //Network State Listener to show or dismiss snackbar
     public static class NetworkStateReceiver extends BroadcastReceiver {
 
