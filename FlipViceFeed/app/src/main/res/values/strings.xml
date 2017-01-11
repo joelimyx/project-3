@@ -8,7 +8,7 @@
     <string name="topic_filter">Topic Filter</string>
     <string name="title_activity_detail">Detail View</string>
 
-    <string name="facebook_app_id">226865891058843</string>
+    <string name="facebook_app_id">your facebook_app_id</string>
     <string name="preference_current_filter">current filter</string>
     <string name="current_filter">current filter</string>
 
