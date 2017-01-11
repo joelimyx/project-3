@@ -1,6 +1,8 @@
 # <img src= "FlipViceFeed/app/src/main/res/drawable/vooziconwithshadow.png" height="40px"/> Welcome to VooZ
 ###### By Yuan Xue Lim, Colin Bradley, Kenny Korb and David Scarimbolo
 
+### <img src="https://cdn2.iconfinder.com/data/icons/freecns-cumulus/32/519791-101_Warning-128.png" height =30px/>*This app is deprecated after Vice's decision to shut down their API.*
+
 ## Introduction
 
 VooZ is a simple to use news app that utilizes Vice API to create a visually appealing app. Users can select their topic of interest and VooZ will create a customize the feed to best suit them. VooZ also parses thru the body of the articles, which was represented in html, and extract important informations to be presented in a cleanly formatted article.
