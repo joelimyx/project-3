@@ -1,7 +1,7 @@
 # <img src= "FlipViceFeed/app/src/main/res/drawable/vooziconwithshadow.png" height="40px"/> Welcome to VooZ
 ###### By Yuan Xue Lim, Colin Bradley, Kenny Korb and David Scarimbolo
 
-### <img src="https://cdn2.iconfinder.com/data/icons/freecns-cumulus/32/519791-101_Warning-128.png" height =30px/>*This app is deprecated after Vice's decision to shut down their API.*
+### <img src="https://cdn2.iconfinder.com/data/icons/freecns-cumulus/32/519791-101_Warning-128.png" height =30px/>*This app was deprecated after Vice's decision to shut down their API.*
 
 ## Introduction
 
